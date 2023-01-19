@@ -34,7 +34,7 @@ class BaseFormView:
         self.form_surface.fill((30, 30, 30))
         if self.current_base_form is not None:
             self.current_base_form.draw(self.form_surface)
-        screen.blit(self.form_surface, (10, 10))
+        screen.blit(self.form_surface, (0, 0))
 
     def switch_edit(self, event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
