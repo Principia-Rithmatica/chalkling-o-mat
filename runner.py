@@ -1,10 +1,9 @@
 import pygame
 import pygame_gui
 
-from base_form import BaseForm
+from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
-from file_loader import FileLoader
-from base_form_storage import load_form, save_form
+from event_dispatcher import EventDispatcher
 
 
 class Runner:
@@ -19,15 +18,15 @@ class Runner:
         self.background = pygame.Surface((800, 600))
         self.background.fill((0, 0, 0))
 
-        self.file_loader = FileLoader(self.ui_manager, self.load_file)
-        self.base_form_view = BaseFormView()
+        self.event_dispatcher = EventDispatcher()
+        self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher)
+        self.storage_view = BaseFormStorageView(self.ui_manager, self.event_dispatcher, self.base_form_view)
 
-        self.event_listeners = [self.file_loader]
         self.drawables = [self.base_form_view]
 
     def run(self):
         while self.is_running:
-            time_delta = self.clock.tick(60)/1000.0
+            time_delta = self.clock.tick(60) / 1000.0
             self.handle_events()
             self.draw()
             self.ui_manager.update(time_delta)
@@ -44,16 +43,8 @@ class Runner:
         for event in events:
             if event.type == pygame.QUIT:
                 self.is_running = False
-            for event_listener in self.event_listeners:
-                event_listener.process_events(event)
+            self.event_dispatcher.process_event(event)
             self.ui_manager.process_events(event)
-
-    def load_file(self, file: str):
-        form = load_form(file)
-        if form is None:
-            return
-        self.base_form_view.show(form)
-
 
 if __name__ == "__main__":
     app = Runner()
