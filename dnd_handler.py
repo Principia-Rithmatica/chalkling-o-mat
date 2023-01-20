@@ -32,25 +32,24 @@ class DragAndDropHandler:
     def is_dnd(self) -> bool:
         return self.dnd_dragged is not None
 
-    def start_drag(self, event: Event):
+    def start_drag(self, event: Event) -> bool:
         if not self.is_dnd_enabled():
-            return
+            return False
         print("start dnd")
         self.dnd_dragged = self.dnd_selected
         self.previous_position = self.dnd_selected.get_pos()
         return True
 
-    def move_drag(self, event: Event):
+    def move_drag(self, event: Event) -> bool:
         if not self.is_dnd_enabled():
-            return
+            return False
 
         self.dnd_selected.set_pos(event.pos)
         return True
 
-    def stop_drag(self, event: Event):
-        if not self.is_dnd_enabled():
-            return
-        print("stop dnd")
-        self.dnd_dragged = None
-        self.dnd_selected = None
-        return True
+    def stop_drag(self, event: Event) -> bool:
+        if self.is_dnd_enabled():
+            print("stop dnd")
+            self.dnd_dragged = None
+            self.dnd_selected = None
+        return False

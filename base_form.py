@@ -16,7 +16,7 @@ class BaseForm(Editable):
         if lines is None:
             lines = []
         self.lines: List[Line] = lines
-        self.previous_point: Point = Point((0, 0))
+        self.previous_point: Point | None = None
         self.selected_line: Line | None = None
         self.selected_point: Point | None = None
 
@@ -45,7 +45,7 @@ class BaseForm(Editable):
 
     def add_point(self, pos: (int, int)):
         point = Point(pos)
-        if self.previous_point.tuple() != (0, 0):
+        if self.previous_point is not None:
             self.lines.append(Line(self.previous_point, point))
         self.set_previous_point(point)
 
@@ -77,9 +77,12 @@ class BaseForm(Editable):
     def set_previous_point(self, point: Point | None):
         if self.previous_point is not None:
             self.previous_point.unmark(Marks.PREVIOUS)
-        self.previous_point = point
-        if point is not None:
-            point.mark(Marks.PREVIOUS)
+        if self.previous_point == point:
+            self.previous_point = None
+        else:
+            self.previous_point = point
+            if point is not None:
+                point.mark(Marks.PREVIOUS)
 
     def start_editing(self):
         super().start_editing()

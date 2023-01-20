@@ -1,9 +1,10 @@
 import random
+from typing import List
 
 import pygame
 from pygame import Surface
 
-from consts import WHITE, YELLOW
+from consts import WHITE, YELLOW, BodyPart, BodyFeature
 from point import Point
 from selectable import Selectable, Marks
 
@@ -16,6 +17,8 @@ class Line(Selectable):
         self.width_min = 1
         self.width_max = 5
         self.width = 1
+        self.bodyPart: List[BodyPart] = [BodyPart.BODY]
+        self.bodyFeature: List[BodyFeature] = []
         self.regenerate()
 
     def draw(self, screen: Surface):

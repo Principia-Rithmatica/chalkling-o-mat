@@ -3,22 +3,25 @@ import pygame_gui
 
 from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
+from consts import WINDOW_WIDTH, WINDOW_HEIGHT
 from event_dispatcher import EventDispatcher
+from setting_view import SettingView
 
 
 class Runner:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Chalkling-o-mat")
-        self.window_surface = pygame.display.set_mode((800, 600))
+        self.window_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-        self.ui_manager = pygame_gui.UIManager((800, 600), 'theme/theme1.json')
+        self.ui_manager = pygame_gui.UIManager((WINDOW_WIDTH, WINDOW_HEIGHT), 'theme/theme1.json')
         self.is_running = True
         self.clock = pygame.time.Clock()
-        self.background = pygame.Surface((800, 600))
+        self.background = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.background.fill((0, 0, 0))
 
         self.event_dispatcher = EventDispatcher()
+        self.setting_view = SettingView(self.ui_manager, self.event_dispatcher)
         self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher)
         self.storage_view = BaseFormStorageView(self.ui_manager, self.event_dispatcher, self.base_form_view)
 
@@ -45,6 +48,7 @@ class Runner:
                 self.is_running = False
             self.event_dispatcher.process_event(event)
             self.ui_manager.process_events(event)
+
 
 if __name__ == "__main__":
     app = Runner()
