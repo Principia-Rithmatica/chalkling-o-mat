@@ -2,49 +2,54 @@ import math
 import random
 
 import pygame
+from pygame import Rect, Vector2
+from pygame.surface import Surface
 
-from consts import WHITE, YELLOW, POINT_SIZE, GREEN
+from consts import WHITE, YELLOW, POINT_SIZE, GREEN, GREY
 from dnd_handler import DragAble
+from point_setting import PointSetting
 from selectable import Marks, Selectable
 
 
 class Point(Selectable, DragAble):
 
-    def __init__(self, pos: (int, int)):
+    def __init__(self, pos: Vector2, settings: PointSetting):
         super().__init__()
-        self.current_pos: (int, int) = pos
-        self.base_pos: (int, int) = pos
-        self.x_bounds: (int, int) = (0, 0)
-        self.y_bounds: (int, int) = (0, 0)
+        super(Selectable, self).__init__()
+        self.settings: PointSetting = settings
+        self.pos = pos
+        self.settings.set_base(self.pos)
 
     def regenerate(self):
-        new_x = int(self.base_pos[0] + random.uniform(self.x_bounds[0], self.x_bounds[1]))
-        new_y = int(self.base_pos[1] + random.uniform(self.y_bounds[0], self.y_bounds[1]))
-        self.current_pos = (new_x, new_y)
+        self.pos.update(self.settings.get_new_position())
 
-    def __getitem__(self, idx):
-        return self.current_pos[idx]
-
-    def tuple(self):
-        return self.current_pos
-
-    def draw(self, screen):
+    def draw(self, screen: Surface):
         color = WHITE
         if self.is_marked(Marks.PREVIOUS):
             color = GREEN
         elif self.is_marked(Marks.SELECTED):
             color = YELLOW
 
-        pygame.draw.circle(screen, color, self.tuple(), POINT_SIZE)
+        pygame.draw.circle(screen, color, self.get_pos(), POINT_SIZE)
+        if self.is_marked(Marks.SELECTED):
+            self.draw_addition_info(screen)
 
-    def is_selected(self, pos: (int, int)):
-        if math.dist(self.tuple(), pos) < POINT_SIZE * 2:
+    def draw_addition_info(self, screen: Surface):
+        rect = Rect(self.settings.base_x + self.settings.pos_variance_x_min,
+                    self.settings.base_y + self.settings.pos_variance_y_min,
+                    -self.settings.pos_variance_x_min + self.settings.pos_variance_x_max,
+                    -self.settings.pos_variance_y_min + self.settings.pos_variance_y_max)
+
+        pygame.draw.rect(screen, GREY, rect, 2)
+
+    def is_selected(self, pos: (float, float)):
+        if math.dist(self.get_pos(), pos) < POINT_SIZE * 2:
             return True
         return False
 
-    def get_pos(self) -> (int, int):
-        return self.current_pos
+    def get_pos(self) -> (float, float):
+        return self.pos.xy
 
-    def set_pos(self, pos: (int, int)):
-        self.base_pos = pos
-        self.current_pos = pos
+    def set_pos(self, pos: (float, float)):
+        self.pos.update(pos)
+        self.settings.set_base(self.pos)

@@ -6,6 +6,7 @@ from pygame import USEREVENT
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 GREEN = (0, 255, 0)
+GREY = (60,60,60)
 
 # Inputs
 LEFT_MOUSE_BUTTON = 1

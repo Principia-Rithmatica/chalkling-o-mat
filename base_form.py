@@ -1,16 +1,16 @@
 import math
 from typing import List
 
-from pygame import Surface
+from pygame import Surface, Vector2
 
 from consts import POINT_SIZE
-from editable import Editable
 from line import Line
 from point import Point
+from point_setting import PointSetting
 from selectable import Marks
 
 
-class BaseForm(Editable):
+class BaseForm:
     def __init__(self, lines=None):
         super().__init__()
         if lines is None:
@@ -24,27 +24,27 @@ class BaseForm(Editable):
         for line in self.lines:
             line.draw(screen)
 
-    def get_selected(self, pos: (int, int)):
+    def get_selected(self, pos: (float, float)):
         for line in self.lines:
+            # TODO Select Line
             point = line.get_selected(pos)
             if point is None:
                 continue
             return line, point
         return None, None
 
-    def select(self, pos: (int, int)) -> Point | None:
+    def select(self, pos: (float, float)) -> Point | None:
         line, point = self.get_selected(pos)
         if point is None:
             return None
 
         self.set_selected_line(line)
         self.set_selected_point(point)
-        if self.editing:
-            self.set_previous_point(point)
+        self.set_previous_point(point)
         return point
 
-    def add_point(self, pos: (int, int)):
-        point = Point(pos)
+    def add_point(self, pos: (float, float), settings: PointSetting):
+        point = Point(Vector2(pos), settings)
         if self.previous_point is not None:
             self.lines.append(Line(self.previous_point, point))
         self.set_previous_point(point)
@@ -52,7 +52,8 @@ class BaseForm(Editable):
     def remove_point(self, pos):
         to_remove = []
         for line in self.lines:
-            if math.dist(line.point_a.tuple(), pos) < POINT_SIZE * 2 or math.dist(line.point_b.tuple(), pos) < POINT_SIZE * 2:
+            if math.dist(line.point_a.get_pos(), pos) < POINT_SIZE * 2 or \
+               math.dist(line.point_b.get_pos(), pos) < POINT_SIZE * 2:
                 to_remove.append(line)
 
         for line in to_remove:
@@ -83,14 +84,3 @@ class BaseForm(Editable):
             self.previous_point = point
             if point is not None:
                 point.mark(Marks.PREVIOUS)
-
-    def start_editing(self):
-        super().start_editing()
-        line_count = len(self.lines)
-        if line_count > 0:
-            last_line = line_count - 1
-            self.set_previous_point(self.lines[last_line].point_b)
-
-    def stop_editing(self):
-        super().stop_editing()
-        self.set_previous_point(None)

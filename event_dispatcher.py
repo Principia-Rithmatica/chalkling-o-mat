@@ -7,7 +7,7 @@ from pygame_gui.core import UIElement
 class EventDispatcher:
 
     def __init__(self):
-        self.listeners: [Callable[[Event], bool]] = []
+        self._listeners: [Callable[[Event], bool]] = []
 
     def listen(self, listener: Callable[[Event], bool], element: UIElement = None, event_type: int | None = None):
         def filtered_listener(event: Event):
@@ -20,9 +20,9 @@ class EventDispatcher:
             if (no_element or element_is_target) and (no_event_type or event_type_equals):
                 return listener(event)
 
-        self.listeners.append(filtered_listener)
+        self._listeners.append(filtered_listener)
 
     def process_event(self, event: Event):
-        for listener in self.listeners:
+        for listener in self._listeners:
             if listener(event):
                 return

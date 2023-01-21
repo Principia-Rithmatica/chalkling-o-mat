@@ -1,6 +1,7 @@
 import os
 import pickle
 
+import dill
 import pygame
 import pygame_gui
 from pygame.event import Event
@@ -38,40 +39,45 @@ class BaseFormStorageView:
     def process_load(self, event: Event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             print("Show loading window")
-            self.file_picker.open("Load Base Form...", "base_forms",
-                                  lambda file: self.base_form_view.show(load_form(file)))
+            self.base_form_view.editable = False
+            self.file_picker.open("Load Base Form...", "base_forms", self.load, self.enable_edit)
             return True
         return False
+
+    def load(self, file):
+        try:
+            with open(file, "rb") as f:
+                current_base_form = dill.load(f)
+                self.base_form_view.show(current_base_form)
+        except Exception as ex:
+            print("Error during unpickling object (Possibly unsupported):", ex)
+        self.enable_edit()
 
     def process_save(self, event: Event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             print("Show saving window")
-            self.file_picker.open("Save Base Form...", "base_forms",
-                                  lambda file: save_form(self.base_form_view.current_base_form, file))
+            self.base_form_view.editable = False
+            self.file_picker.open("Save Base Form...", "base_forms", self.save, self.enable_edit)
             return True
         return False
 
-def save_form(form: BaseForm, file: str):
-    try:
-        with open(file, "wb") as f:
-            pickle.dump(form, f)
-    except Exception as ex:
-        print("Error during pickling object (Possibly unsupported):", ex)
+    def save(self, file):
+        try:
+            with open(file, "wb") as f:
+                dill.dump(self.base_form_view.current_base_form, f)
+                # pickle.dump(self.base_form_view.current_base_form, f)
+        except Exception as ex:
+            print("Error during pickling object (Possibly unsupported):", ex)
+        self.enable_edit()
 
+    def enable_edit(self):
+        self.base_form_view.editable = True
 
-def load_form(file: str):
-    try:
-        with open(file, "rb") as f:
-            return pickle.load(f)
-    except Exception as ex:
-        print("Error during unpickling object (Possibly unsupported):", ex)
-
-
-def list_forms(path):
-    files = os.listdir(path)
-    result = []
-    for file in files:
-        if file.endswith(FILE_FORMAT):
-            form = load_form(os.path.join(path, file))
-            result.append(form)
-    return result
+    # def list_forms(self, path):
+    #     files = os.listdir(path)
+    #     result = []
+    #     for file in files:
+    #         if file.endswith(FILE_FORMAT):
+    #             form = self.load(os.path.join(path, file))
+    #             result.append(form)
+    #     return result

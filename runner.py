@@ -1,6 +1,7 @@
 import pygame
 import pygame_gui
 
+import setting_view
 from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
 from consts import WINDOW_WIDTH, WINDOW_HEIGHT
@@ -22,7 +23,7 @@ class Runner:
 
         self.event_dispatcher = EventDispatcher()
         self.setting_view = SettingView(self.ui_manager, self.event_dispatcher)
-        self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher)
+        self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher, self.setting_view.point_setting_view)
         self.storage_view = BaseFormStorageView(self.ui_manager, self.event_dispatcher, self.base_form_view)
 
         self.drawables = [self.base_form_view]
