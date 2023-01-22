@@ -1,10 +1,15 @@
 import random
+from typing import Tuple
 
+import pygame
 from pygame import Rect
 from pygame.event import Event
-from pygame_gui import UIManager, UI_TEXT_ENTRY_FINISHED, UI_TEXT_ENTRY_CHANGED
-from pygame_gui.elements import UIWindow, UILabel, UITextEntryLine
+from pygame.math import Vector2
+from pygame_gui import UIManager, UI_TEXT_ENTRY_CHANGED
+from pygame_gui.core import UIContainer
+from pygame_gui.elements import UILabel, UITextEntryLine, UITextBox
 
+from consts import SELECT_ELEMENT
 from event_dispatcher import EventDispatcher
 
 
@@ -21,51 +26,53 @@ class PointSetting:
         self.angle_min: float = angle_min
         self.angle_max: float = angle_max
 
-    def set_base(self, pos: (float, float)):
+    def set_base(self, pos: Tuple[float, float] | Vector2):
         self.base_x, self.base_y = pos
 
-    def get_new_position(self) -> (float, float):
+    def get_new_position(self) -> Tuple[float, float]:
         new_x = self.base_x + random.uniform(self.pos_variance_x_min, self.pos_variance_x_max)
         new_y = self.base_y + random.uniform(self.pos_variance_y_min, self.pos_variance_y_max)
         # TODO Implement angle
         return new_x, new_y
 
 
-class PointSettingView:
-    def __init__(self, ui_manager: UIManager, event_dispatcher: EventDispatcher):
-        self.ui_manager: UIManager = ui_manager
-        self.event_dispatcher: EventDispatcher = event_dispatcher
-        self.selected_setting: PointSetting | None = None
-        self.window: UIWindow = UIWindow(Rect(512, 0, 350, 300), ui_manager, "Pofloat Setting", draggable=False)
+class PointSettingView(UIContainer):
+    def __init__(self, manager: UIManager, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect,
+                 anchor: dict[str, str]):
+        super().__init__(relative_rect, manager, anchors=anchor)
+        self.selected_setting: PointSetting = PointSetting()
 
-        allowed_characters = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-']
-        self.title_pos_variance = UILabel(Rect(10, 10, 310, 30), "Pos Variance X", ui_manager, container=self.window)
-        self.pos_variance_x_min = UITextEntryLine(relative_rect=Rect(10, 40, 150, 30), manager=ui_manager,
-                                                  container=self.window, initial_text="-10")
+        y = 10
+        self.title: UITextBox = UITextBox("Point Setting", Rect(10, y, 310, 30), container=self)
+        y += 30
+
+        allowed_characters = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.']
+        self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Pos Variance X", manager, container=self)
+        y += 30
+        self.pos_variance_x_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="-10")
         self.pos_variance_x_min.set_allowed_characters(allowed_characters)
-        self.pos_variance_x_max = UITextEntryLine(relative_rect=Rect(160, 40, 150, 30), manager=ui_manager,
-                                                  container=self.window, initial_text="10")
+        self.pos_variance_x_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="10")
         self.pos_variance_x_max.set_allowed_characters(allowed_characters)
 
-        self.title_pos_variance = UILabel(Rect(10, 70, 310, 30), "Pos Variance Y", ui_manager, container=self.window)
-        self.pos_variance_y_min = UITextEntryLine(relative_rect=Rect(10, 100, 150, 30), manager=ui_manager,
-                                                  container=self.window, initial_text="-10")
+        y += 30
+        self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Pos Variance Y", manager, container=self)
+        y += 30
+        self.pos_variance_y_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="-10")
         self.pos_variance_y_min.set_allowed_characters(allowed_characters)
-        self.pos_variance_y_max = UITextEntryLine(relative_rect=Rect(160, 100, 150, 30), manager=ui_manager,
-                                                  container=self.window, initial_text="10")
+        self.pos_variance_y_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="10")
         self.pos_variance_y_max.set_allowed_characters(allowed_characters)
-
-        self.title_angle = UILabel(Rect(10, 130, 310, 30), "Angle", ui_manager, container=self.window)
-        self.angle_min = UITextEntryLine(relative_rect=Rect(10, 160, 150, 30), manager=ui_manager,
-                                         container=self.window, initial_text="0")
+        y += 30
+        self.title_angle = UILabel(Rect(10, y, 310, 30), "Angle", manager, container=self)
+        y += 30
+        self.angle_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="0")
         self.angle_min.set_allowed_characters(allowed_characters)
-        self.angle_max = UITextEntryLine(relative_rect=Rect(160, 160, 150, 30), manager=ui_manager,
-                                         container=self.window, initial_text="0")
+        self.angle_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="0")
         self.angle_max.set_allowed_characters(allowed_characters)
 
         event_dispatcher.listen(self.on_change_data, event_type=UI_TEXT_ENTRY_CHANGED)
+        event_dispatcher.listen(self.on_select, event_type=SELECT_ELEMENT)
 
-    def get_point_settings(self) -> PointSetting:
+    def get_settings(self) -> PointSetting:
         setting = PointSetting()
         self.fill_setting(setting)
         return setting
@@ -98,6 +105,10 @@ class PointSettingView:
         self.angle_max.set_text(str(setting.angle_max))
 
     def on_change_data(self, event: Event) -> bool:
-        print("fill data")
         self.fill_setting(self.selected_setting)
-        return True
+        return False
+
+    def on_select(self, event: Event) -> bool:
+        setting = None if event.selected_point is None else event.selected_point.settings
+        self.set_setting(setting)
+        return False

@@ -1,5 +1,6 @@
 import math
 import random
+from typing import Tuple
 
 import pygame
 from pygame import Rect, Vector2
@@ -42,14 +43,20 @@ class Point(Selectable, DragAble):
 
         pygame.draw.rect(screen, GREY, rect, 2)
 
-    def is_selected(self, pos: (float, float)):
+    def is_selected(self, pos: Tuple[float, float]):
         if math.dist(self.get_pos(), pos) < POINT_SIZE * 2:
             return True
         return False
 
-    def get_pos(self) -> (float, float):
-        return self.pos.xy
+    def get_pos(self) -> Tuple[float, float]:
+        return self.pos.xy[0], self.pos.xy[1]
 
-    def set_pos(self, pos: (float, float)):
+    def set_pos(self, pos: Tuple[float, float] | Vector2):
         self.pos.update(pos)
-        self.settings.set_base(self.pos)
+        self.settings.set_base(self.get_pos())
+
+    def move(self, direction: Vector2):
+        self.set_pos(self.pos - direction)
+
+    def __getitem__(self, item):
+        return self.pos[item]

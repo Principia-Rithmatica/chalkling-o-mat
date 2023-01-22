@@ -20,7 +20,19 @@ WINDOW_HEIGHT = 800
 # Events
 MY_EVENTS = USEREVENT+100
 SELECT_ELEMENT = MY_EVENTS + 1
+CHECKBOX_CHANGED = MY_EVENTS + 2
 
+# Anchor
+
+TOP_RIGHT = {'left': 'right',
+             'right': 'right',
+             'top': 'top',
+             'bottom': 'top'}
+
+BOTTOM_RIGHT = {'left': 'right',
+             'right': 'right',
+             'top': 'bottom',
+             'bottom': 'bottom'}
 
 # Classifications
 class BodyPart(Enum):

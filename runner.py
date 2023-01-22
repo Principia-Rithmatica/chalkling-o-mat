@@ -1,12 +1,13 @@
 import pygame
 import pygame_gui
+from pygame.rect import Rect
 
-import setting_view
 from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
-from consts import WINDOW_WIDTH, WINDOW_HEIGHT
+from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT
 from event_dispatcher import EventDispatcher
-from setting_view import SettingView
+from line_setting import LineSettingView
+from point_setting import PointSettingView
 
 
 class Runner:
@@ -22,8 +23,12 @@ class Runner:
         self.background.fill((0, 0, 0))
 
         self.event_dispatcher = EventDispatcher()
-        self.setting_view = SettingView(self.ui_manager, self.event_dispatcher)
-        self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher, self.setting_view.point_setting_view)
+        self.point_setting_view = PointSettingView(
+            self.ui_manager, self.event_dispatcher, Rect(-350, 10, 350, 340), TOP_RIGHT)
+        self.line_setting_view = LineSettingView(
+            self.ui_manager, self.event_dispatcher, Rect(-350, 340, 350, 340), TOP_RIGHT)
+        self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher, self.point_setting_view,
+                                           self.line_setting_view)
         self.storage_view = BaseFormStorageView(self.ui_manager, self.event_dispatcher, self.base_form_view)
 
         self.drawables = [self.base_form_view]
