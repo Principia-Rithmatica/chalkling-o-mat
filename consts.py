@@ -6,7 +6,7 @@ from pygame import USEREVENT
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 GREEN = (0, 255, 0)
-GREY = (60,60,60)
+GREY = (60, 60, 60)
 
 # Inputs
 LEFT_MOUSE_BUTTON = 1
@@ -18,7 +18,7 @@ WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 800
 
 # Events
-MY_EVENTS = USEREVENT+100
+MY_EVENTS = USEREVENT + 100
 SELECT_ELEMENT = MY_EVENTS + 1
 CHECKBOX_CHANGED = MY_EVENTS + 2
 
@@ -30,9 +30,10 @@ TOP_RIGHT = {'left': 'right',
              'bottom': 'top'}
 
 BOTTOM_RIGHT = {'left': 'right',
-             'right': 'right',
-             'top': 'bottom',
-             'bottom': 'bottom'}
+                'right': 'right',
+                'top': 'bottom',
+                'bottom': 'bottom'}
+
 
 # Classifications
 class BodyPart(Enum):
@@ -42,7 +43,7 @@ class BodyPart(Enum):
     BODY = 8
     TAIL = 16
     WING = 32
-
+    HEAD = 64
 
 class BodyFeature(Enum):
     ARMORED = 1

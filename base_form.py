@@ -38,12 +38,9 @@ class BaseForm:
                 return selected_line, selected_point
         return None, None
 
-    def select(self, pos: Tuple[float, float]) -> (Line | None, Point | None):
-        line, point = self.get_selected(pos)
-
+    def select(self, line: (Line | None), point: (Point | None)):
         self.set_selected_line(line)
         self.set_selected_point(point)
-        return line, point
 
     def add_point(self, pos: Tuple[float, float], point_setting: PointSetting, line_setting: LineSetting):
         point = Point(Vector2(pos), point_setting)

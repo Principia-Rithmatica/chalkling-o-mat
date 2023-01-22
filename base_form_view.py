@@ -42,12 +42,24 @@ class BaseFormView(DragAndDropHandler):
         if not self.form_surface.get_rect().collidepoint(event.pos) or not self.editable:
             return False
         selected_line, selected_point = self.current_base_form.get_selected(event.pos)
-        selected_element = selected_point if selected_point is not None else selected_line
+
         # Start DnD
+        selected_element = selected_point if selected_point is not None else selected_line
         self.start_drag(selected_element)
 
+        # Select -> Deselect
+        unselect = False
+        if selected_line is not None and selected_line == self.selected_line:
+            selected_line = None
+            unselect = True
+        if selected_point is not None and selected_point == self.selected_point:
+            selected_point = None
+            unselect = True
+
         # Select Point / Line
-        self.selected_line, self.selected_point = self.current_base_form.select(event.pos)
+        self.current_base_form.select(selected_line, selected_point)
+        self.selected_line = selected_line
+        self.selected_point = selected_point
         pygame.event.post(Event(SELECT_ELEMENT, selected_point=self.selected_point, selected_line=self.selected_line))
 
         # Select Previous One
@@ -55,7 +67,10 @@ class BaseFormView(DragAndDropHandler):
             self.current_base_form.set_previous_point(selected_point)
 
         # Add Point
-        if event.button == LEFT_MOUSE_BUTTON and self.selected_point is None and self.selected_line is None:
+        if event.button == LEFT_MOUSE_BUTTON \
+                and self.selected_point is None \
+                and self.selected_line is None\
+                and not unselect:
             self.add_point(event.pos)
             return True
         if event.button == RIGHT_MOUSE_BUTTON:
