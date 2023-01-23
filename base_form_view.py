@@ -1,11 +1,9 @@
 from typing import Tuple
 
 import pygame
-import pygame_gui
 from pygame.event import Event
 from pygame.surface import Surface
 from pygame_gui import UIManager
-from pygame_gui.elements import UIButton
 
 from base_form import BaseForm
 from consts import LEFT_MOUSE_BUTTON, RIGHT_MOUSE_BUTTON, SELECT_ELEMENT
@@ -69,7 +67,7 @@ class BaseFormView(DragAndDropHandler):
         # Add Point
         if event.button == LEFT_MOUSE_BUTTON \
                 and self.selected_point is None \
-                and self.selected_line is None\
+                and self.selected_line is None \
                 and not unselect:
             self.add_point(event.pos)
             return True
@@ -108,6 +106,9 @@ class BaseFormView(DragAndDropHandler):
         self.current_base_form.remove_point(pos)
         print("Remove point")
 
-    def show(self, form: BaseForm):
+    def set_current_form(self, form: BaseForm):
         print("Show new form")
         self.current_base_form = form if form is not None else BaseForm()
+
+    def get_current_form(self) -> BaseForm:
+        return self.current_base_form

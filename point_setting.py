@@ -10,7 +10,7 @@ from pygame_gui.core import UIContainer
 from pygame_gui.elements import UILabel, UITextEntryLine, UITextBox
 
 from UICheckbox import UICheckbox
-from consts import SELECT_ELEMENT, CHECKBOX_CHANGED
+from consts import SELECT_ELEMENT, CHECKBOX_CHANGED, NUM_CHARACTERS
 from event_dispatcher import EventDispatcher
 
 
@@ -48,28 +48,27 @@ class PointSettingView(UIContainer):
         self.title: UITextBox = UITextBox("Point Setting", Rect(10, y, 310, 30), container=self)
         y += 30
 
-        allowed_characters = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.']
         self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Pos Variance X", manager, container=self)
         y += 30
         self.pos_variance_x_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="-10")
-        self.pos_variance_x_min.set_allowed_characters(allowed_characters)
+        self.pos_variance_x_min.set_allowed_characters(NUM_CHARACTERS)
         self.pos_variance_x_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="10")
-        self.pos_variance_x_max.set_allowed_characters(allowed_characters)
+        self.pos_variance_x_max.set_allowed_characters(NUM_CHARACTERS)
 
         y += 30
         self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Pos Variance Y", manager, container=self)
         y += 30
         self.pos_variance_y_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="-10")
-        self.pos_variance_y_min.set_allowed_characters(allowed_characters)
+        self.pos_variance_y_min.set_allowed_characters(NUM_CHARACTERS)
         self.pos_variance_y_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="10")
-        self.pos_variance_y_max.set_allowed_characters(allowed_characters)
+        self.pos_variance_y_max.set_allowed_characters(NUM_CHARACTERS)
         y += 30
         self.title_angle = UILabel(Rect(10, y, 310, 30), "Angle", manager, container=self)
         y += 30
         self.angle_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="0")
-        self.angle_min.set_allowed_characters(allowed_characters)
+        self.angle_min.set_allowed_characters(NUM_CHARACTERS)
         self.angle_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="0")
-        self.angle_max.set_allowed_characters(allowed_characters)
+        self.angle_max.set_allowed_characters(NUM_CHARACTERS)
         y += 30
         self.curve = UICheckbox(Rect(10, y, 310, 30), "Curve", None, container=self)
 
@@ -112,6 +111,7 @@ class PointSettingView(UIContainer):
         self.curve.set_checked(setting.curve)
 
     def on_change_data(self, event: Event) -> bool:
+        print("update point data")
         self.fill_setting(self.selected_setting)
         return False
 

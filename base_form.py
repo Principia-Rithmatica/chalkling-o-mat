@@ -11,6 +11,15 @@ from point_setting import PointSetting
 from selectable import Marks
 
 
+class Stats:
+    def __init__(self):
+        self.attack: float = 0.5
+        self.defense: float = 0.5
+        self.speed: float = 0.5
+        self.life: float = 0.5
+        self.aesthetic: float = 0.5
+
+
 class BaseForm:
     def __init__(self, lines=None):
         super().__init__()
@@ -21,21 +30,16 @@ class BaseForm:
         self.previous_point: Point | None = None
         self.selected_line: Line | None = None
         self.selected_point: Point | None = None
+        self.stats = Stats()
 
     def draw(self, screen: Surface):
-        drawn_lines = []
         for line in self.lines:
-            if line in drawn_lines:
-                continue
-
             if line.point_a.settings.curve:
                 connected_lines = self.point_line_map[line.point_a]
                 line.draw_curves(screen, line.point_a, connected_lines)
-                # drawn_lines.extend(connected_lines)
             elif line.point_b.settings.curve:
                 connected_lines = self.point_line_map[line.point_b]
                 line.draw_curves(screen, line.point_b, connected_lines)
-                # drawn_lines.extend(connected_lines)
             else:
                 line.draw(screen)
 

@@ -4,10 +4,11 @@ from pygame.rect import Rect
 
 from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
-from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT
+from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_LEFT
 from event_dispatcher import EventDispatcher
 from line_setting import LineSettingView
 from point_setting import PointSettingView
+from stat_view import StatView
 
 
 class Runner:
@@ -29,6 +30,8 @@ class Runner:
             self.ui_manager, self.event_dispatcher, Rect(-350, 340, 350, 340), TOP_RIGHT)
         self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher, self.point_setting_view,
                                            self.line_setting_view)
+        self.stats_view = StatView(self.ui_manager, self.event_dispatcher, Rect(10, -200, 200, 200), BOTTOM_LEFT,
+                                   self.base_form_view)
         self.storage_view = BaseFormStorageView(self.ui_manager, self.event_dispatcher, self.base_form_view)
 
         self.drawables = [self.base_form_view]

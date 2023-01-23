@@ -9,7 +9,7 @@ from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.elements import UILabel, UITextBox, UITextEntryLine
 
 from UICheckbox import UICheckbox, get_checked_values
-from consts import BodyPart, BodyFeature, SELECT_ELEMENT, CHECKBOX_CHANGED
+from consts import BodyPart, BodyFeature, SELECT_ELEMENT, CHECKBOX_CHANGED, NUM_CHARACTERS
 from event_dispatcher import EventDispatcher
 
 
@@ -32,8 +32,10 @@ class LineSettingView(UIContainer):
         y += 30
         self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Width", container=self)
         y += 30
-        self.width_variance_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="1")
-        self.width_variance_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="15")
+        self.width_variance_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="1.0")
+        self.width_variance_min.set_allowed_characters(NUM_CHARACTERS)
+        self.width_variance_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="15.0")
+        self.width_variance_max.set_allowed_characters(NUM_CHARACTERS)
         y += 30
         self.body_parts: dict[BodyPart, UICheckbox] = self.generate_body_parts(Rect(10, y, 150, 30))
         self.body_features: dict[BodyFeature, UICheckbox] = self.generate_body_feature(Rect(160, y, 150, 30))
@@ -75,7 +77,7 @@ class LineSettingView(UIContainer):
         except TypeError:
             pass
 
-    def set_setting(self, setting: LineSetting):
+    def set_setting(self, setting: LineSetting | None):
         if setting is None:
             # Copy the value to prevent overriding the previous selected line
             setting = LineSetting()

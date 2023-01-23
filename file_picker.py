@@ -3,6 +3,8 @@ from typing import Callable
 import pygame
 import pygame_gui
 from pygame import MOUSEBUTTONDOWN
+from pygame.event import Event
+from pygame_gui import UI_FILE_DIALOG_PATH_PICKED, UI_WINDOW_CLOSE
 from pygame_gui.windows import UIFileDialog
 
 from event_dispatcher import EventDispatcher
@@ -15,7 +17,8 @@ class FilePicker:
         self.file_dialog: UIFileDialog | None = None
         self.ui_manager = ui_manager
         self.event_dispatcher = event_dispatcher
-        self.event_dispatcher.listen(self.process_events)
+        self.event_dispatcher.listen(self.on_file_picked, event_type=UI_FILE_DIALOG_PATH_PICKED)
+        self.event_dispatcher.listen(self.on_close_window, event_type=UI_WINDOW_CLOSE)
 
     def open(self, window_title: str, folder: str, on_pick_file: Callable[[str], None], on_close: Callable[[], None]):
         self.on_pick_file = on_pick_file
@@ -28,16 +31,16 @@ class FilePicker:
                                         allow_existing_files_only=False,
                                         allowed_suffixes={".pickle"})
 
-    def process_events(self, event):
+    def on_close_window(self, event: Event) -> bool:
         if hasattr(event, "ui_element") and event.ui_element != self.file_dialog:
             return False
+        self.file_dialog = None
+        self.on_close()
+        return True
 
-        if event.type == pygame_gui.UI_FILE_DIALOG_PATH_PICKED:
-            self.on_pick_file(event.text)
-            pygame.event.set_allowed(MOUSEBUTTONDOWN)
-            return True
-        if event.type == pygame_gui.UI_WINDOW_CLOSE:
-            self.file_dialog = None
-            self.on_close()
-            return True
-        return False
+    def on_file_picked(self, event: Event) -> bool:
+        if hasattr(event, "ui_element") and event.ui_element != self.file_dialog:
+            return False
+        self.on_pick_file(event.text)
+        pygame.event.set_allowed(MOUSEBUTTONDOWN)
+        return True

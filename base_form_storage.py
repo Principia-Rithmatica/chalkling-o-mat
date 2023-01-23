@@ -9,6 +9,7 @@ from pygame_gui.elements import UIButton
 
 from base_form import BaseForm
 from base_form_view import BaseFormView
+from consts import LOAD_FORM
 from event_dispatcher import EventDispatcher
 from file_picker import FilePicker
 
@@ -48,7 +49,8 @@ class BaseFormStorageView:
         try:
             with open(file, "rb") as f:
                 current_base_form = dill.load(f)
-                self.base_form_view.show(current_base_form)
+                self.base_form_view.set_current_form(current_base_form)
+                pygame.event.post(Event(LOAD_FORM, form=current_base_form))
         except Exception as ex:
             print("Error during unpickling object (Possibly unsupported):", ex)
         self.enable_edit()
@@ -64,8 +66,7 @@ class BaseFormStorageView:
     def save(self, file):
         try:
             with open(file, "wb") as f:
-                dill.dump(self.base_form_view.current_base_form, f)
-                # pickle.dump(self.base_form_view.current_base_form, f)
+                dill.dump(self.base_form_view.get_current_form(), f)
         except Exception as ex:
             print("Error during pickling object (Possibly unsupported):", ex)
         self.enable_edit()

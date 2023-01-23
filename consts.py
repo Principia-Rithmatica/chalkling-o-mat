@@ -12,6 +12,9 @@ GREY = (60, 60, 60)
 LEFT_MOUSE_BUTTON = 1
 RIGHT_MOUSE_BUTTON = 3
 
+NUM_CHARACTERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.']
+
+
 # Defaults
 POINT_SIZE = 5
 WINDOW_WIDTH = 900
@@ -21,6 +24,7 @@ WINDOW_HEIGHT = 800
 MY_EVENTS = USEREVENT + 100
 SELECT_ELEMENT = MY_EVENTS + 1
 CHECKBOX_CHANGED = MY_EVENTS + 2
+LOAD_FORM = MY_EVENTS + 3
 
 # Anchor
 
@@ -34,6 +38,13 @@ BOTTOM_RIGHT = {'left': 'right',
                 'top': 'bottom',
                 'bottom': 'bottom'}
 
+BOTTOM_LEFT = {
+    'left': 'left',
+    'bottom': 'bottom',
+    'top': 'bottom',
+    'right': 'left'
+}
+
 
 # Classifications
 class BodyPart(Enum):
@@ -44,6 +55,7 @@ class BodyPart(Enum):
     TAIL = 16
     WING = 32
     HEAD = 64
+
 
 class BodyFeature(Enum):
     ARMORED = 1
