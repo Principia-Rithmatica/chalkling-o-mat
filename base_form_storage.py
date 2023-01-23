@@ -1,13 +1,9 @@
-import os
-import pickle
-
 import dill
 import pygame
 import pygame_gui
 from pygame.event import Event
 from pygame_gui.elements import UIButton
 
-from base_form import BaseForm
 from base_form_view import BaseFormView
 from consts import LOAD_FORM
 from event_dispatcher import EventDispatcher
