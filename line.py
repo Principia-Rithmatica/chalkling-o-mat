@@ -1,16 +1,26 @@
 import math
 import random
-from typing import Tuple
+from typing import Tuple, List
 
 import pygame
 from pygame import Surface
 from pygame.math import Vector2
 
+from bezier import bezier_curve
 from consts import WHITE, YELLOW
 from dnd_handler import DragAble
 from line_setting import LineSetting
 from point import Point
 from selectable import Selectable, Marks
+
+
+def draw_bezier(surface: Surface, start_point: Point, point: Point, end_point: Point, color):
+    curve = bezier_curve([start_point.get_pos(), point.get_pos(), point.get_pos(), end_point.get_pos()])
+    prev_point = None
+    for curve_point in curve:
+        if prev_point is not None:
+            pygame.draw.line(surface, color, prev_point, curve_point)
+        prev_point = curve_point
 
 
 class Line(Selectable, DragAble):
@@ -25,11 +35,30 @@ class Line(Selectable, DragAble):
     def draw(self, screen: Surface):
         self.point_a.draw(screen)
         self.point_b.draw(screen)
+        color = self.get_color()
+
+        pygame.draw.line(screen, color, self.point_a.get_pos(), self.point_b.get_pos(), self.width)
+
+    def get_color(self):
         color = WHITE
         if self.is_marked(Marks.SELECTED):
             color = YELLOW
+        return color
 
-        pygame.draw.line(screen, color, self.point_a.get_pos(), self.point_b.get_pos(), self.width)
+    def draw_curves(self, screen: Surface, point: Point, connected_lines):
+        point.draw(screen)
+        if len(connected_lines) < 2:
+            return []
+        color = self.get_color()
+        for start_line in connected_lines:
+            start_point = start_line.point_b if start_line.point_a == point else start_line.point_a
+            for end_line in connected_lines:
+                if start_line == end_line:
+                    continue
+                end_point = end_line.point_b if end_line.point_a == point else end_line.point_a
+                start_point.draw(screen)
+                end_point.draw(screen)
+                draw_bezier(screen, start_point, point, end_point, color)
 
     def regenerate(self):
         self.point_a.regenerate()

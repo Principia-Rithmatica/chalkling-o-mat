@@ -30,7 +30,7 @@ class BaseFormView(DragAndDropHandler):
         self.editable: bool = True
 
         event_dispatcher.listen(self.on_select, event_type=pygame.MOUSEBUTTONDOWN)
-        event_dispatcher.listen(self.on_join, event_type=pygame.KEYUP)
+        event_dispatcher.listen(self.on_keyup, event_type=pygame.KEYUP)
 
     def draw(self, screen: Surface):
         self.form_surface.fill((30, 30, 30))
@@ -79,15 +79,20 @@ class BaseFormView(DragAndDropHandler):
 
         return False
 
-    def on_join(self, event: Event) -> bool:
-        if event.key != pygame.K_j:
-            return False
+    def on_keyup(self, event: Event) -> bool:
+        match event.key:
+            case pygame.K_j:
+                self.join_line()
+            case pygame.K_n:
+                self.current_base_form = BaseForm()
 
+        return False
+
+    def join_line(self):
         pos = pygame.mouse.get_pos()
         line, point = self.current_base_form.get_selected(pos)
         if point is None:
-            return False
-
+            return
         line_setting = self.line_setting_view.get_setting()
         previous_point = self.current_base_form.previous_point
         self.current_base_form.add_line(point, previous_point, line_setting)

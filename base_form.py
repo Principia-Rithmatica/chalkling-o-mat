@@ -17,13 +17,27 @@ class BaseForm:
         if lines is None:
             lines = []
         self.lines: List[Line] = lines
+        self.point_line_map: dict[Point, List[Line]] = dict()
         self.previous_point: Point | None = None
         self.selected_line: Line | None = None
         self.selected_point: Point | None = None
 
     def draw(self, screen: Surface):
+        drawn_lines = []
         for line in self.lines:
-            line.draw(screen)
+            if line in drawn_lines:
+                continue
+
+            if line.point_a.settings.curve:
+                connected_lines = self.point_line_map[line.point_a]
+                line.draw_curves(screen, line.point_a, connected_lines)
+                # drawn_lines.extend(connected_lines)
+            elif line.point_b.settings.curve:
+                connected_lines = self.point_line_map[line.point_b]
+                line.draw_curves(screen, line.point_b, connected_lines)
+                # drawn_lines.extend(connected_lines)
+            else:
+                line.draw(screen)
 
     def get_selected(self, pos: Tuple[float, float]) -> Tuple[Line | None, Point | None]:
         for line in self.lines:
@@ -46,10 +60,17 @@ class BaseForm:
         point = Point(Vector2(pos), point_setting)
         if self.previous_point is not None:
             self.add_line(self.previous_point, point, line_setting)
+
         self.set_previous_point(point)
 
     def add_line(self, point_a: Point, point_b: Point, line_setting: LineSetting):
-        self.lines.append(Line(point_a, point_b, line_setting))
+        line = Line(point_a, point_b, line_setting)
+        self.lines.append(line)
+
+        self.point_line_map.setdefault(point_a, [])
+        self.point_line_map.setdefault(point_b, [])
+        self.point_line_map[point_a].append(line)
+        self.point_line_map[point_b].append(line)
 
     def remove_point(self, pos):
         to_remove = []
@@ -60,6 +81,8 @@ class BaseForm:
 
         for line in to_remove:
             self.lines.remove(line)
+            self.point_line_map[line.point_a].remove(line)
+            self.point_line_map[line.point_b].remove(line)
 
     def regenerate(self):
         for line in self.lines:

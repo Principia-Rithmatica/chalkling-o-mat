@@ -9,7 +9,8 @@ from pygame_gui import UIManager, UI_TEXT_ENTRY_CHANGED
 from pygame_gui.core import UIContainer
 from pygame_gui.elements import UILabel, UITextEntryLine, UITextBox
 
-from consts import SELECT_ELEMENT
+from UICheckbox import UICheckbox
+from consts import SELECT_ELEMENT, CHECKBOX_CHANGED
 from event_dispatcher import EventDispatcher
 
 
@@ -25,6 +26,7 @@ class PointSetting:
         self.pos_variance_y_max: float = pos_variance_y_max
         self.angle_min: float = angle_min
         self.angle_max: float = angle_max
+        self.curve: bool = False
 
     def set_base(self, pos: Tuple[float, float] | Vector2):
         self.base_x, self.base_y = pos
@@ -68,9 +70,12 @@ class PointSettingView(UIContainer):
         self.angle_min.set_allowed_characters(allowed_characters)
         self.angle_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="0")
         self.angle_max.set_allowed_characters(allowed_characters)
+        y += 30
+        self.curve = UICheckbox(Rect(10, y, 310, 30), "Curve", None, container=self)
 
         event_dispatcher.listen(self.on_change_data, event_type=UI_TEXT_ENTRY_CHANGED)
         event_dispatcher.listen(self.on_select, event_type=SELECT_ELEMENT)
+        event_dispatcher.listen(self.on_change_data, element=self.curve, event_type=CHECKBOX_CHANGED)
 
     def get_settings(self) -> PointSetting:
         setting = PointSetting()
@@ -85,6 +90,7 @@ class PointSettingView(UIContainer):
             setting.pos_variance_y_max = float(self.pos_variance_y_max.text)
             setting.angle_min = float(self.angle_min.text)
             setting.angle_max = float(self.angle_max.text)
+            setting.curve = self.curve.is_checked()
 
         except ValueError:
             pass
@@ -103,6 +109,7 @@ class PointSettingView(UIContainer):
         self.pos_variance_y_max.set_text(str(setting.pos_variance_y_max))
         self.angle_min.set_text(str(setting.angle_min))
         self.angle_max.set_text(str(setting.angle_max))
+        self.curve.set_checked(setting.curve)
 
     def on_change_data(self, event: Event) -> bool:
         self.fill_setting(self.selected_setting)
