@@ -29,15 +29,16 @@ class Line(Selectable, DragAble):
         super().__init__()
         self.point_a: Point = point_a
         self.point_b: Point = point_b
-        self.width = 1
+        self.width = 2
         self.settings: LineSetting = settings
 
-    def draw(self, screen: Surface):
-        self.point_a.draw(screen)
-        self.point_b.draw(screen)
+    def draw(self, screen: Surface, draw_points: bool = True):
+        if draw_points:
+            self.point_a.draw(screen)
+            self.point_b.draw(screen)
         color = self.get_color()
 
-        pygame.draw.line(screen, color, self.point_a.get_pos(), self.point_b.get_pos(), self.width)
+        pygame.draw.line(screen, color, self.point_a.get_pos(), self.point_b.get_pos(), int(self.width))
 
     def get_color(self):
         color = WHITE
@@ -45,8 +46,9 @@ class Line(Selectable, DragAble):
             color = YELLOW
         return color
 
-    def draw_curves(self, screen: Surface, point: Point, connected_lines):
-        point.draw(screen)
+    def draw_curves(self, screen: Surface, point: Point, connected_lines, draw_points: bool = True):
+        if draw_points:
+            point.draw(screen)
         if len(connected_lines) < 2:
             return []
         color = self.get_color()
@@ -56,14 +58,14 @@ class Line(Selectable, DragAble):
                 if start_line == end_line:
                     continue
                 end_point = end_line.point_b if end_line.point_a == point else end_line.point_a
-                start_point.draw(screen)
-                end_point.draw(screen)
+                if draw_points:
+                    start_point.draw(screen)
+                    end_point.draw(screen)
                 draw_bezier(screen, start_point, point, end_point, color)
 
     def regenerate(self):
         self.point_a.regenerate()
         self.point_b.regenerate()
-        self.width = float(random.uniform(self.settings.width_variance_min, self.settings.width_variance_max))
 
     def get_selected_point(self, pos: Tuple[float, float]) -> Point | None:
         if self.point_a.is_selected(pos):
@@ -91,7 +93,7 @@ class Line(Selectable, DragAble):
         x, y = p
 
         # check if point is within the X of the line / trust me I'm EnGiNeEr!
-        if not(x1 <= p[0] <= x2 or x1 >= p[0] >= x2) and not(y1 <= p[1] <= y2 or y1 >= p[1] >= y2):
+        if not (x1 <= p[0] <= x2 or x1 >= p[0] >= x2) and not (y1 <= p[1] <= y2 or y1 >= p[1] >= y2):
             return math.inf
 
         # For vertical lines

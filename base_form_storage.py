@@ -2,6 +2,7 @@ import dill
 import pygame
 import pygame_gui
 from pygame.event import Event
+from pygame_gui.core import UIContainer, IContainerLikeInterface
 from pygame_gui.elements import UIButton
 
 from base_form_view import BaseFormView
@@ -17,17 +18,18 @@ BOTTOM_RIGHT = {'left': 'right',
 
 
 class BaseFormStorageView:
-    def __init__(self, ui_manager, event_dispatcher: EventDispatcher, base_form_view: BaseFormView):
+    def __init__(self, ui_manager, event_dispatcher: EventDispatcher, base_form_view: BaseFormView,
+                 container: IContainerLikeInterface):
         self.load_button = UIButton(
-            relative_rect=pygame.Rect(-180, -60, 150, 30),
+            relative_rect=pygame.Rect(10, 10, 150, 30),
             text='Load',
             manager=ui_manager,
-            anchors=BOTTOM_RIGHT)
+            container=container)
         self.save_button = UIButton(
-            relative_rect=pygame.Rect(-180, -90, 150, 30),
+            relative_rect=pygame.Rect(10, 40, 150, 30),
             text='Save',
             manager=ui_manager,
-            anchors=BOTTOM_RIGHT)
+            container=container)
         self.base_form_view = base_form_view
         self.file_picker = FilePicker(ui_manager, event_dispatcher)
         event_dispatcher.listen(self.process_load, self.load_button)

@@ -18,7 +18,7 @@ class Point(Selectable, DragAble):
         super().__init__()
         super(Selectable, self).__init__()
         self.settings: PointSetting = settings
-        self.pos = pos
+        self.pos: Vector2 = pos
         self.settings.set_base(self.pos)
 
     def regenerate(self):
@@ -60,3 +60,6 @@ class Point(Selectable, DragAble):
 
     def __getitem__(self, item):
         return self.pos[item]
+
+    def scale(self, factor: float):
+        self.set_pos(self.pos * factor)

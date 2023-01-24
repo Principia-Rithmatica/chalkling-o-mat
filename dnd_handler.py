@@ -49,10 +49,11 @@ class DragAndDropHandler:
         return True
 
     def stop_drag(self, event: Event) -> bool:
-        if self.is_dragging():
-            self._dragged_object = None
+        self._dragged_object = None
+        self._previous_position = Vector2(0, 0)
+
+        if self.is_dragging() and self._has_moved:
             has_moved = self._has_moved
             self._has_moved = False
-            self._previous_position = Vector2(0, 0)
             return has_moved
         return False

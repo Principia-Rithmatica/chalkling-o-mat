@@ -6,7 +6,7 @@ from pygame.surface import Surface
 from pygame_gui import UIManager
 
 from base_form import BaseForm
-from consts import LEFT_MOUSE_BUTTON, RIGHT_MOUSE_BUTTON, SELECT_ELEMENT
+from consts import LEFT_MOUSE_BUTTON, RIGHT_MOUSE_BUTTON, SELECT_ELEMENT, EDIT_FORM
 from dnd_handler import DragAndDropHandler
 from event_dispatcher import EventDispatcher
 from line import Line
@@ -83,16 +83,25 @@ class BaseFormView(DragAndDropHandler):
                 self.join_line()
             case pygame.K_n:
                 self.current_base_form = BaseForm()
+                pygame.event.post(Event(EDIT_FORM))
 
         return False
+
+    def stop_drag(self, event: Event) -> bool:
+        was_dragged = super().stop_drag(event)
+        if was_dragged:
+            pygame.event.post(Event(EDIT_FORM))
+            print("Stop DND")
+        return was_dragged
 
     def join_line(self):
         pos = pygame.mouse.get_pos()
         line, point = self.current_base_form.get_selected(pos)
-        if point is None:
+        previous_point = self.current_base_form.previous_point
+
+        if point is None or previous_point is None:
             return
         line_setting = self.line_setting_view.get_setting()
-        previous_point = self.current_base_form.previous_point
         self.current_base_form.add_line(point, previous_point, line_setting)
 
     def add_point(self, pos: Tuple[float, float]):
