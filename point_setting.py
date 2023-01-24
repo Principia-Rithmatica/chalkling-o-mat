@@ -37,6 +37,12 @@ class PointSetting:
         # TODO Implement angle
         return new_x, new_y
 
+    def set_bounds(self, bounds: Rect):
+        self.pos_variance_x_min = -bounds.width / 2
+        self.pos_variance_x_max = bounds.width / 2
+        self.pos_variance_y_min = -bounds.height / 2
+        self.pos_variance_y_max = bounds.height / 2
+
 
 class PointSettingView(UIContainer):
     def __init__(self, manager: UIManager, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect,
@@ -116,6 +122,7 @@ class PointSettingView(UIContainer):
         return False
 
     def on_select(self, event: Event) -> bool:
-        setting = None if event.selected_point is None else event.selected_point.settings
+        setting = event.selected_point.settings if not hasattr(event, "selected_point") \
+                                                   and event.selected_point is not None else None
         self.set_setting(setting)
         return False

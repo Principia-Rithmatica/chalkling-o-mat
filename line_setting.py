@@ -97,6 +97,7 @@ class LineSettingView(UIContainer):
 
     def on_select(self, event: Event) -> bool:
         print("Select line for settings")
-        setting = None if event.selected_line is None else event.selected_line.settings
+        setting = event.selected_line.settings if hasattr(event, "selected_line") and \
+                                                  event.selected_line is not None else None
         self.set_setting(setting)
         return False

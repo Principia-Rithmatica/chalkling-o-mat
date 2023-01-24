@@ -63,3 +63,7 @@ class Point(Selectable, DragAble):
 
     def scale(self, factor: float):
         self.set_pos(self.pos * factor)
+
+    def set_bounds(self, bounds: Rect):
+        self.set_pos(bounds.center)
+        self.settings.set_bounds(bounds)
