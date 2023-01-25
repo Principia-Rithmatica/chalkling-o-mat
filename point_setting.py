@@ -24,8 +24,6 @@ class PointSetting:
         self.pos_variance_x_max: float = pos_variance_x_max
         self.pos_variance_y_min: float = pos_variance_y_min
         self.pos_variance_y_max: float = pos_variance_y_max
-        self.angle_min: float = angle_min
-        self.angle_max: float = angle_max
         self.curve: bool = False
 
     def set_base(self, pos: Tuple[float, float] | Vector2):
@@ -34,7 +32,6 @@ class PointSetting:
     def get_new_position(self) -> Tuple[float, float]:
         new_x = self.base_x + random.uniform(self.pos_variance_x_min, self.pos_variance_x_max)
         new_y = self.base_y + random.uniform(self.pos_variance_y_min, self.pos_variance_y_max)
-        # TODO Implement angle
         return new_x, new_y
 
     def set_bounds(self, bounds: Rect):
@@ -69,13 +66,6 @@ class PointSettingView(UIContainer):
         self.pos_variance_y_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="10")
         self.pos_variance_y_max.set_allowed_characters(NUM_CHARACTERS)
         y += 30
-        self.title_angle = UILabel(Rect(10, y, 310, 30), "Angle", manager, container=self)
-        y += 30
-        self.angle_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="0")
-        self.angle_min.set_allowed_characters(NUM_CHARACTERS)
-        self.angle_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="0")
-        self.angle_max.set_allowed_characters(NUM_CHARACTERS)
-        y += 30
         self.curve = UICheckbox(Rect(10, y, 310, 30), "Curve", None, container=self)
 
         event_dispatcher.listen(self.on_change_data, event_type=UI_TEXT_ENTRY_CHANGED)
@@ -93,8 +83,6 @@ class PointSettingView(UIContainer):
             setting.pos_variance_x_max = float(self.pos_variance_x_max.text)
             setting.pos_variance_y_min = float(self.pos_variance_y_min.text)
             setting.pos_variance_y_max = float(self.pos_variance_y_max.text)
-            setting.angle_min = float(self.angle_min.text)
-            setting.angle_max = float(self.angle_max.text)
             setting.curve = self.curve.is_checked()
 
         except ValueError:
@@ -112,8 +100,6 @@ class PointSettingView(UIContainer):
         self.pos_variance_x_max.set_text(str(setting.pos_variance_x_max))
         self.pos_variance_y_min.set_text(str(setting.pos_variance_y_min))
         self.pos_variance_y_max.set_text(str(setting.pos_variance_y_max))
-        self.angle_min.set_text(str(setting.angle_min))
-        self.angle_max.set_text(str(setting.angle_max))
         self.curve.set_checked(setting.curve)
 
     def on_change_data(self, event: Event) -> bool:
@@ -122,7 +108,7 @@ class PointSettingView(UIContainer):
         return False
 
     def on_select(self, event: Event) -> bool:
-        setting = event.selected_point.settings if not hasattr(event, "selected_point") \
+        setting = event.selected_point.settings if hasattr(event, "selected_point") \
                                                    and event.selected_point is not None else None
         self.set_setting(setting)
         return False

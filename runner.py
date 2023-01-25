@@ -8,7 +8,7 @@ from pygame_gui.elements import UIButton
 
 from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
-from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, REGENERATE
+from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, REGENERATE, TOP_LEFT
 from event_dispatcher import EventDispatcher
 from line_setting import LineSettingView
 from point_setting import PointSettingView
@@ -36,7 +36,7 @@ class Runner:
             self.ui_manager, self.event_dispatcher, Rect(-350, 340, 350, 340), TOP_RIGHT)
         self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher, self.point_setting_view,
                                            self.line_setting_view)
-        self.stats_view = StatView(self.ui_manager, self.event_dispatcher, Rect(10, -200, 200, 200), BOTTOM_LEFT,
+        self.stats_view = StatView(self.ui_manager, self.event_dispatcher, Rect(10, 522, 200, 200), TOP_LEFT,
                                    self.base_form_view)
         self.storage_view = BaseFormStorageView(self.ui_manager, self.event_dispatcher, self.base_form_view,
                                                 self.global_buttons)

@@ -31,6 +31,11 @@ EDIT_POINT = MY_EVENTS + 6
 
 # Anchor
 
+TOP_LEFT = {'left': 'left',
+             'right': 'left',
+             'top': 'top',
+             'bottom': 'top'}
+
 TOP_RIGHT = {'left': 'right',
              'right': 'right',
              'top': 'top',
