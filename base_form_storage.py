@@ -1,76 +1,79 @@
+import os
+
 import dill
 import pygame
 import pygame_gui
+from pygame import KEYUP
 from pygame.event import Event
+from pygame_gui import UI_BUTTON_PRESSED
 from pygame_gui.core import UIContainer, IContainerLikeInterface
-from pygame_gui.elements import UIButton
+from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.elements import UIButton, UITextEntryLine
 
 from base_form_view import BaseFormView
-from consts import LOAD_FORM
+from consts import LOAD_FORM, FILE_SUFFIX
 from event_dispatcher import EventDispatcher
 from file_picker import FilePicker
 
-FILE_FORMAT = ".pickle"
-BOTTOM_RIGHT = {'left': 'right',
-                'right': 'right',
-                'top': 'bottom',
-                'bottom': 'bottom'}
 
-
-class BaseFormStorageView:
-    def __init__(self, ui_manager, event_dispatcher: EventDispatcher, base_form_view: BaseFormView,
-                 container: IContainerLikeInterface):
-        self.load_button = UIButton(
-            relative_rect=pygame.Rect(10, 10, 150, 30),
-            text='Load',
-            manager=ui_manager,
-            container=container)
-        self.save_button = UIButton(
-            relative_rect=pygame.Rect(10, 40, 150, 30),
-            text='Save',
-            manager=ui_manager,
-            container=container)
+class BaseFormStorageView(UIContainer):
+    def __init__(self, ui_manager: IUIManagerInterface, event_dispatcher: EventDispatcher, base_form_view: BaseFormView,
+                 relative_rect: pygame.Rect, anchors: dict[str, str]):
+        super().__init__(relative_rect, ui_manager, anchors=anchors)
+        self.path = "base_forms"
+        self.load_button = UIButton(pygame.Rect(10, 10, 150, 30), 'Load', ui_manager, self)
+        self.save_button = UIButton(pygame.Rect(10, 40, 150, 30), 'Save', ui_manager, self)
+        self.file_name = UITextEntryLine(pygame.Rect(10, 70, 150, 30), ui_manager, self,
+                                         initial_text=self.get_free_name())
         self.base_form_view = base_form_view
         self.file_picker = FilePicker(ui_manager, event_dispatcher)
-        event_dispatcher.listen(self.process_load, self.load_button)
-        event_dispatcher.listen(self.process_save, self.save_button)
 
-    def process_load(self, event: Event):
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            print("Show loading window")
-            self.base_form_view.editable = False
-            self.file_picker.open("Load Base Form...", "base_forms", self.load, self.enable_edit)
-            return True
-        return False
+        event_dispatcher.listen(self.on_load, self.load_button, UI_BUTTON_PRESSED)
+        event_dispatcher.listen(self.on_save, self.save_button, UI_BUTTON_PRESSED)
+        event_dispatcher.listen(self.on_key_up, event_type=KEYUP)
+
+    def on_load(self, event: Event):
+        print("Show loading window")
+        self.base_form_view.disable_input()
+        self.file_picker.open("Load Base Form...", self.path, self.load, self.enable_input)
+        return True
 
     def load(self, file):
         try:
             with open(file, "rb") as f:
+                self.set_filename(file)
                 current_base_form = dill.load(f)
                 self.base_form_view.set_current_form(current_base_form)
                 pygame.event.post(Event(LOAD_FORM, form=current_base_form))
         except Exception as ex:
             print("Error during unpickling object (Possibly unsupported):", ex)
-        self.enable_edit()
+        self.enable_input()
 
-    def process_save(self, event: Event):
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            print("Show saving window")
-            self.base_form_view.editable = False
-            self.file_picker.open("Save Base Form...", "base_forms", self.save, self.enable_edit)
-            return True
-        return False
+    def set_filename(self, filepath):
+        self.path = os.path.dirname(filepath)
+        self.file_name.set_text(os.path.basename(filepath))
 
-    def save(self, file):
+    def on_save(self, event: Event):
+        self.save()
+        return True
+
+    def save(self):
         try:
-            with open(file, "wb") as f:
+            with open(os.path.join(self.path, self.file_name.get_text()), "wb") as f:
                 dill.dump(self.base_form_view.get_current_form(), f)
         except Exception as ex:
             print("Error during pickling object (Possibly unsupported):", ex)
-        self.enable_edit()
+        self.enable_input()
 
-    def enable_edit(self):
-        self.base_form_view.editable = True
+    def enable_input(self):
+        self.base_form_view.enable_input()
+
+    def on_key_up(self, event: Event) -> bool:
+        match event.key:
+            case pygame.K_s:
+                self.save()
+                return True
+        return False
 
     # def list_forms(self, path):
     #     files = os.listdir(path)
@@ -80,3 +83,16 @@ class BaseFormStorageView:
     #             form = self.load(os.path.join(path, file))
     #             result.append(form)
     #     return result
+    def get_free_name(self) -> str:
+        files = os.listdir(self.path)
+        i = 0
+        def_name = "unnamed"
+        current_filename = def_name + FILE_SUFFIX
+        unused = False
+        while not unused:
+            if current_filename in files:
+                i += 1
+                current_filename = f'{def_name}_{i}{FILE_SUFFIX}'
+            else:
+                unused = True
+        return current_filename

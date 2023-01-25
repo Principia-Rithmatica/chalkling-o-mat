@@ -59,10 +59,7 @@ class BaseFormView(DragAndDropHandler):
             unselect = True
 
         # Select Point / Line
-        self.current_base_form.select(selected_line, selected_point)
-        self.selected_line = selected_line
-        self.selected_point = selected_point
-        pygame.event.post(Event(SELECT_ELEMENT, selected_point=self.selected_point, selected_line=self.selected_line))
+        self.select_element(selected_line, selected_point)
 
         # Select Previous One
         if selected_point is not None:
@@ -124,8 +121,15 @@ class BaseFormView(DragAndDropHandler):
         if self.selected_point is None:
             line_setting = self.line_setting_view.get_setting()
             point_setting = self.point_setting_view.get_settings()
-            self.current_base_form.add_point(pos, point_setting, line_setting)
+            point, line = self.current_base_form.add_point(pos, point_setting, line_setting)
+            self.select_element(line, point)
             print("Add point")
+
+    def select_element(self, line: Line | None = None, point: Point | None = None):
+        self.current_base_form.select(line, point)
+        self.selected_line = line
+        self.selected_point = point
+        pygame.event.post(Event(SELECT_ELEMENT, selected_point=self.selected_point, selected_line=self.selected_line))
 
     def remove_point(self, pos: Tuple[float, float]):
         self.current_base_form.remove_point(pos)
@@ -137,3 +141,11 @@ class BaseFormView(DragAndDropHandler):
 
     def get_current_form(self) -> BaseForm:
         return self.current_base_form
+
+    def disable_input(self):
+        self.editable = False
+        self.area_selector.enabled = False
+
+    def enable_input(self):
+        self.editable = True
+        self.area_selector.enabled = False

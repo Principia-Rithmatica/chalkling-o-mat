@@ -7,6 +7,7 @@ from pygame.event import Event
 from pygame_gui import UI_FILE_DIALOG_PATH_PICKED, UI_WINDOW_CLOSE
 from pygame_gui.windows import UIFileDialog
 
+from consts import FILE_SUFFIX
 from event_dispatcher import EventDispatcher
 
 
@@ -29,7 +30,7 @@ class FilePicker:
                                         initial_file_path=folder,
                                         allow_picking_directories=False,
                                         allow_existing_files_only=False,
-                                        allowed_suffixes={".pickle"})
+                                        allowed_suffixes={FILE_SUFFIX})
 
     def on_close_window(self, event: Event) -> bool:
         if hasattr(event, "ui_element") and event.ui_element != self.file_dialog:

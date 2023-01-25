@@ -2,7 +2,7 @@ import random
 from typing import Tuple
 
 import pygame
-from pygame import Rect
+from pygame import Rect, KEYUP
 from pygame.event import Event
 from pygame.math import Vector2
 from pygame_gui import UIManager, UI_TEXT_ENTRY_CHANGED
@@ -70,6 +70,7 @@ class PointSettingView(UIContainer):
 
         event_dispatcher.listen(self.on_change_data, event_type=UI_TEXT_ENTRY_CHANGED)
         event_dispatcher.listen(self.on_select, event_type=SELECT_ELEMENT)
+        event_dispatcher.listen(self.on_key_up, event_type=KEYUP)
         event_dispatcher.listen(self.on_change_data, element=self.curve, event_type=CHECKBOX_CHANGED)
 
     def get_settings(self) -> PointSetting:
@@ -111,4 +112,11 @@ class PointSettingView(UIContainer):
         setting = event.selected_point.settings if hasattr(event, "selected_point") \
                                                    and event.selected_point is not None else None
         self.set_setting(setting)
+        return False
+
+    def on_key_up(self, event: Event) -> bool:
+        match event.key:
+            case pygame.K_c:
+                self.curve.toggle()
+                return True
         return False

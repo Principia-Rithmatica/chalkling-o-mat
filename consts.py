@@ -14,11 +14,11 @@ RIGHT_MOUSE_BUTTON = 3
 
 NUM_CHARACTERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.']
 
-
 # Defaults
 POINT_SIZE = 5
 WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 800
+FILE_SUFFIX = ".pickle"
 
 # Events
 MY_EVENTS = USEREVENT + 100
@@ -32,9 +32,9 @@ EDIT_POINT = MY_EVENTS + 6
 # Anchor
 
 TOP_LEFT = {'left': 'left',
-             'right': 'left',
-             'top': 'top',
-             'bottom': 'top'}
+            'right': 'left',
+            'top': 'top',
+            'bottom': 'top'}
 
 TOP_RIGHT = {'left': 'right',
              'right': 'right',

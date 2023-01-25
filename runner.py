@@ -28,23 +28,21 @@ class Runner:
         self.background = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.background.fill((0, 0, 0))
 
-        self.global_buttons = UIContainer(Rect(-180, -30 * 5, 170, 30 * 5), self.ui_manager, anchors=BOTTOM_RIGHT)
         self.event_dispatcher = EventDispatcher()
         self.point_setting_view = PointSettingView(
             self.ui_manager, self.event_dispatcher, Rect(-350, 10, 350, 340), TOP_RIGHT)
         self.line_setting_view = LineSettingView(
-            self.ui_manager, self.event_dispatcher, Rect(-350, 340, 350, 340), TOP_RIGHT)
+            self.ui_manager, self.event_dispatcher, Rect(-350, 240, 350, 340), TOP_RIGHT)
         self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher, self.point_setting_view,
                                            self.line_setting_view)
         self.stats_view = StatView(self.ui_manager, self.event_dispatcher, Rect(10, 522, 200, 200), TOP_LEFT,
                                    self.base_form_view)
         self.storage_view = BaseFormStorageView(self.ui_manager, self.event_dispatcher, self.base_form_view,
-                                                self.global_buttons)
+                                                Rect(-170, -120, 170, 120), BOTTOM_RIGHT)
         self.drawables = [self.base_form_view]
 
         preview_width = 128
         preview_height = 128
-        self.add_regenerate_button()
         for i in range(4):
             x = i % 2 * preview_width
             y = int(i / 2) * preview_height
@@ -73,14 +71,6 @@ class Runner:
                 self.is_running = False
             self.event_dispatcher.process_event(event)
             self.ui_manager.process_events(event)
-
-    def add_regenerate_button(self):
-        regenerate = UIButton(Rect(10, 70, 150, 30), "Reload", self.ui_manager, self.global_buttons)
-
-        def send_regenerate(event: Event) -> bool:
-            pygame.event.post(Event(REGENERATE))
-            return True
-        self.event_dispatcher.listen(send_regenerate, regenerate, UI_BUTTON_PRESSED)
 
 
 if __name__ == "__main__":

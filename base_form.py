@@ -73,16 +73,18 @@ class BaseForm:
         self.set_selected_line(line)
         self.set_selected_point(point)
 
-    def add_point(self, pos: Tuple[float, float], point_setting: PointSetting, line_setting: LineSetting) -> Point:
+    def add_point(self, pos: Tuple[float, float], point_setting: PointSetting, line_setting: LineSetting)\
+            -> (Point, Line | None):
         point = Point(Vector2(pos), point_setting)
+        line = None
         if self.previous_point is not None:
-            self.add_line(self.previous_point, point, line_setting)
+            line = self.add_line(self.previous_point, point, line_setting)
 
         self.set_previous_point(point)
         pygame.event.post(Event(EDIT_FORM))
-        return point
+        return point, line
 
-    def add_line(self, point_a: Point, point_b: Point, line_setting: LineSetting):
+    def add_line(self, point_a: Point, point_b: Point, line_setting: LineSetting) -> Line:
         line = Line(point_a, point_b, line_setting)
         self.lines.append(line)
 
@@ -91,6 +93,7 @@ class BaseForm:
         self.point_line_map[point_a].append(line)
         self.point_line_map[point_b].append(line)
         pygame.event.post(Event(EDIT_FORM))
+        return line
 
     def remove_point(self, pos):
         to_remove = []

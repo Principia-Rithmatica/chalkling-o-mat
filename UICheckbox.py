@@ -1,6 +1,7 @@
 from typing import TypeVar, List
 
 import pygame
+from pygame.event import Event
 from pygame_gui.elements import UIButton
 
 from consts import CHECKBOX_CHANGED
@@ -25,11 +26,14 @@ class UICheckbox(UIButton):
         super().update(time_delta)
         if self.check_pressed():
             self.set_checked(not self.checked)
-            event = pygame.event.Event(CHECKBOX_CHANGED, ui_element=self, checked=self.checked)
-            pygame.event.post(event)
+            pygame.event.post(Event(CHECKBOX_CHANGED, ui_element=self, checked=self.checked))
 
     def is_checked(self) -> bool:
         return self.checked
+
+    def toggle(self):
+        self.set_checked(not self.is_checked())
+        pygame.event.post(Event(CHECKBOX_CHANGED, ui_element=self, checked=self.checked))
 
 
 def get_checked_values(checkboxes: dict[D, UICheckbox]) -> List[D]:
