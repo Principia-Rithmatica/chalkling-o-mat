@@ -9,7 +9,7 @@ from pygame.surface import Surface
 from consts import WHITE, YELLOW, POINT_SIZE, GREEN, GREY
 from dnd_handler import DragAble
 from point_setting import PointSetting
-from selectable import Marks, Selectable
+from selection_handler import Selectable, Marks
 
 
 class Point(Selectable, DragAble):
@@ -43,10 +43,8 @@ class Point(Selectable, DragAble):
 
         pygame.draw.rect(screen, GREY, rect, 2)
 
-    def is_selected(self, pos: Tuple[float, float]):
-        if math.dist(self.get_pos(), pos) < POINT_SIZE * 2:
-            return True
-        return False
+    def is_selected(self, selection: Rect) -> bool:
+        return selection.collidepoint(self.pos[0], self.pos[1])
 
     def get_pos(self) -> Tuple[float, float]:
         return self.pos.xy[0], self.pos.xy[1]
@@ -67,3 +65,4 @@ class Point(Selectable, DragAble):
     def set_bounds(self, bounds: Rect):
         self.set_pos(bounds.center)
         self.settings.set_bounds(bounds)
+

@@ -25,7 +25,6 @@ class DragAndDropHandler:
         self._has_moved: bool = False
 
         event_dispatcher.listen(self.move_drag, event_type=pygame.MOUSEMOTION)
-        event_dispatcher.listen(self.stop_drag, event_type=pygame.MOUSEBUTTONUP)
 
     def is_dragging(self) -> bool:
         return self._dragged_object is not None
@@ -48,7 +47,11 @@ class DragAndDropHandler:
         self._previous_position = event.pos
         return True
 
-    def stop_drag(self, event: Event) -> bool:
+    def stop_drag(self) -> bool:
+        """
+        Stop dragging process.
+        :return: if the drag has moved
+        """
         self._previous_position = Vector2(0, 0)
         self._dragged_object = None
         if self._has_moved:

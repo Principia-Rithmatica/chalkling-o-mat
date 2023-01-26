@@ -1,6 +1,7 @@
 from typing import List, Iterable
 
 import pygame
+import pygame_gui
 from pygame import Rect, KEYUP
 from pygame.event import Event
 from pygame_gui import UI_TEXT_ENTRY_CHANGED
@@ -19,12 +20,12 @@ class LineSetting:
         self.width_variance_max: float = 15.0
         self.body_parts: List[BodyPart] = []
         self.body_features: List[BodyFeature] = []
+        self.curve: bool = False
 
 
 class LineSettingView(UIContainer):
-    def __init__(self, manager: IUIManagerInterface, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect,
-                 anchor: dict[str, str]):
-        super().__init__(relative_rect, manager, anchors=anchor)
+    def __init__(self, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect, anchor: dict[str, str]):
+        super().__init__(relative_rect, pygame_gui.ui_manager.get_default_manager(), anchors=anchor)
         self.selected_setting: LineSetting = LineSetting()
 
         y = 10
@@ -36,6 +37,8 @@ class LineSettingView(UIContainer):
         self.width_variance_min.set_allowed_characters(NUM_CHARACTERS)
         self.width_variance_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="15.0")
         self.width_variance_max.set_allowed_characters(NUM_CHARACTERS)
+        y += 30
+        self.curve = UICheckbox(Rect(10, y, 300, 30), "Curve", "", container=self)
         y += 30
         self.body_parts: dict[BodyPart, UICheckbox] = self.generate_body_parts(Rect(10, y, 150, 30))
         self.body_features: dict[BodyFeature, UICheckbox] = self.generate_body_feature(Rect(160, y, 150, 30))
@@ -73,6 +76,7 @@ class LineSettingView(UIContainer):
             setting.body_parts = get_checked_values(self.body_parts)
             setting.width_variance_min = float(self.width_variance_min.text)
             setting.width_variance_max = float(self.width_variance_max.text)
+            setting.curve = self.curve.is_checked()
         except ValueError:
             pass
         except TypeError:
@@ -90,6 +94,7 @@ class LineSettingView(UIContainer):
             checkbox.set_checked(body_feature in setting.body_features)
         self.width_variance_min.set_text(str(setting.width_variance_min))
         self.width_variance_max.set_text(str(setting.width_variance_max))
+        self.curve.set_checked(setting.curve)
 
     def on_change_data(self, event: Event) -> bool:
         print("update line data")

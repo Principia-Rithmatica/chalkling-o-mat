@@ -1,9 +1,10 @@
+import copy
 import math
 import random
 from typing import Tuple, List
 
 import pygame
-from pygame import Surface
+from pygame import Surface, Rect
 from pygame.math import Vector2
 
 from bezier import bezier_curve
@@ -11,11 +12,11 @@ from consts import WHITE, YELLOW
 from dnd_handler import DragAble
 from line_setting import LineSetting
 from point import Point
-from selectable import Selectable, Marks
+from selection_handler import Selectable, Marks
 
 
-def draw_bezier(surface: Surface, start_point: Point, point: Point, end_point: Point, color):
-    curve = bezier_curve([start_point.get_pos(), point.get_pos(), point.get_pos(), end_point.get_pos()])
+def draw_bezier(surface: Surface, start_point: Point, point_a: Point, point_b: Point, end_point: Point, color):
+    curve = bezier_curve([start_point.get_pos(), point_a.get_pos(), point_b.get_pos(), end_point.get_pos()])
     prev_point = None
     for curve_point in curve:
         if prev_point is not None:
@@ -29,16 +30,24 @@ class Line(Selectable, DragAble):
         super().__init__()
         self.point_a: Point = point_a
         self.point_b: Point = point_b
+        self.point_a_bezier: Point = copy.deepcopy(point_a)
+        self.point_b_bezier: Point = copy.deepcopy(point_b)
+
+        self.point_a_bezier.move(Vector2(0, 50))
+        self.point_b_bezier.move(Vector2(0, 50))
+
         self.width = 2
         self.settings: LineSetting = settings
 
-    def draw(self, screen: Surface, draw_points: bool = True):
-        if draw_points:
-            self.point_a.draw(screen)
-            self.point_b.draw(screen)
+    def draw(self, screen: Surface):
         color = self.get_color()
-
-        pygame.draw.line(screen, color, self.point_a.get_pos(), self.point_b.get_pos(), int(self.width))
+        if self.settings.curve:
+            draw_bezier(screen, self.point_a, self.point_a_bezier, self.point_b_bezier, self.point_b, color)
+        else:
+            pygame.draw.line(screen, color, self.point_a.get_pos(), self.point_b.get_pos(), int(self.width))
+        if self.is_marked(Marks.SELECTED) and self.settings.curve:
+            self.point_a_bezier.draw(screen)
+            self.point_b_bezier.draw(screen)
 
     def get_color(self):
         color = WHITE
@@ -46,9 +55,7 @@ class Line(Selectable, DragAble):
             color = YELLOW
         return color
 
-    def draw_curves(self, screen: Surface, point: Point, connected_lines, draw_points: bool = True):
-        if draw_points:
-            point.draw(screen)
+    def draw_curves(self, screen: Surface, point: Point, connected_lines):
         if len(connected_lines) < 2:
             return []
         color = self.get_color()
@@ -58,9 +65,6 @@ class Line(Selectable, DragAble):
                 if start_line == end_line:
                     continue
                 end_point = end_line.point_b if end_line.point_a == point else end_line.point_a
-                if draw_points:
-                    start_point.draw(screen)
-                    end_point.draw(screen)
                 draw_bezier(screen, start_point, point, end_point, color)
 
     def regenerate(self):
@@ -84,6 +88,10 @@ class Line(Selectable, DragAble):
         self.point_a.set_pos(pos_a)
         pos_b = self.point_b.pos - direction
         self.point_b.set_pos(pos_b)
+
+    def is_selected(self, selection: Rect) -> bool:
+        clipline = selection.clipline(self.point_a[0], self.point_a[1], self.point_b[0], self.point_b[1])
+        return clipline != ()
 
     def distance(self, p: Point | Tuple[float, float]) -> float:
         if self.point_a is None or self.point_b is None:

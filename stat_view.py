@@ -1,9 +1,9 @@
 import pygame
+import pygame_gui
 from pygame import Rect
 from pygame.event import Event
 from pygame_gui import UI_TEXT_ENTRY_CHANGED
-from pygame_gui.core import UIContainer, IContainerLikeInterface
-from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core import UIContainer
 from pygame_gui.elements import UITextEntryLine, UITextBox, UILabel
 
 from base_form_view import BaseFormView
@@ -12,27 +12,27 @@ from event_dispatcher import EventDispatcher
 
 
 class StatView(UIContainer):
-    def __init__(self, manager: IUIManagerInterface, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect,
+    def __init__(self, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect,
                  anchors: dict[str, str], base_from_view: BaseFormView):
-        super().__init__(relative_rect, manager, anchors=anchors)
+        super().__init__(relative_rect, pygame_gui.ui_manager.get_default_manager(), anchors=anchors)
         self.base_from_view = base_from_view
         y = 10
-        self.title = UITextBox("Stats", Rect(10, y, 150, 30), manager, container=self)
+        self.title = UITextBox("Stats", Rect(10, y, 150, 30), container=self)
         y += 30
         self.attack_label = UILabel(Rect(0, y, 50, 30), "Atk:", container=self)
-        self.attack = UITextEntryLine(Rect(50, y, 100, 30), manager, self, initial_text="0.5")
+        self.attack = UITextEntryLine(Rect(50, y, 100, 30), container=self, initial_text="0.5")
         self.attack.set_allowed_characters(NUM_CHARACTERS)
         y += 30
         self.defense_label = UILabel(Rect(0, y, 50, 30), "Def:", container=self)
-        self.defense = UITextEntryLine(Rect(50, y, 100, 30), manager, self, initial_text="0.5")
+        self.defense = UITextEntryLine(Rect(50, y, 100, 30), container=self, initial_text="0.5")
         self.defense.set_allowed_characters(NUM_CHARACTERS)
         y += 30
         self.speed_label = UILabel(Rect(0, y, 50, 30), "Spd:", container=self)
-        self.speed = UITextEntryLine(Rect(50, y, 100, 30), manager, self, initial_text="0.5")
+        self.speed = UITextEntryLine(Rect(50, y, 100, 30), container=self, initial_text="0.5")
         self.speed.set_allowed_characters(NUM_CHARACTERS)
         y += 30
         self.life_label = UILabel(Rect(0, y, 50, 30), "Life:", container=self)
-        self.life = UITextEntryLine(Rect(50, y, 100, 30), manager, self, initial_text="0.5")
+        self.life = UITextEntryLine(Rect(50, y, 100, 30), container=self, initial_text="0.5")
         self.life.set_allowed_characters(NUM_CHARACTERS)
 
         event_dispatcher.listen(self.on_update_stats, event_type=UI_TEXT_ENTRY_CHANGED)

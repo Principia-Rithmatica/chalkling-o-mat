@@ -17,16 +17,16 @@ from file_picker import FilePicker
 
 
 class BaseFormStorageView(UIContainer):
-    def __init__(self, ui_manager: IUIManagerInterface, event_dispatcher: EventDispatcher, base_form_view: BaseFormView,
+    def __init__(self, event_dispatcher: EventDispatcher, base_form_view: BaseFormView,
                  relative_rect: pygame.Rect, anchors: dict[str, str]):
-        super().__init__(relative_rect, ui_manager, anchors=anchors)
+        super().__init__(relative_rect, pygame_gui.ui_manager.get_default_manager(), anchors=anchors)
         self.path = "base_forms"
-        self.load_button = UIButton(pygame.Rect(10, 10, 150, 30), 'Load', ui_manager, self)
-        self.save_button = UIButton(pygame.Rect(10, 40, 150, 30), 'Save', ui_manager, self)
-        self.file_name = UITextEntryLine(pygame.Rect(10, 70, 150, 30), ui_manager, self,
+        self.load_button = UIButton(pygame.Rect(10, 10, 150, 30), 'Load', container=self)
+        self.save_button = UIButton(pygame.Rect(10, 40, 150, 30), 'Save', container=self)
+        self.file_name = UITextEntryLine(pygame.Rect(10, 70, 150, 30), container=self,
                                          initial_text=self.get_free_name())
         self.base_form_view = base_form_view
-        self.file_picker = FilePicker(ui_manager, event_dispatcher)
+        self.file_picker = FilePicker(event_dispatcher)
 
         event_dispatcher.listen(self.on_load, self.load_button, UI_BUTTON_PRESSED)
         event_dispatcher.listen(self.on_save, self.save_button, UI_BUTTON_PRESSED)
@@ -34,7 +34,7 @@ class BaseFormStorageView(UIContainer):
 
     def on_load(self, event: Event):
         print("Show loading window")
-        self.base_form_view.disable_input()
+        self.base_form_view.disable()
         self.file_picker.open("Load Base Form...", self.path, self.load, self.enable_input)
         return True
 
@@ -66,7 +66,7 @@ class BaseFormStorageView(UIContainer):
         self.enable_input()
 
     def enable_input(self):
-        self.base_form_view.enable_input()
+        self.base_form_view.enable()
 
     def on_key_up(self, event: Event) -> bool:
         match event.key:

@@ -2,6 +2,7 @@ import random
 from typing import Tuple
 
 import pygame
+import pygame_gui
 from pygame import Rect, KEYUP
 from pygame.event import Event
 from pygame.math import Vector2
@@ -42,16 +43,16 @@ class PointSetting:
 
 
 class PointSettingView(UIContainer):
-    def __init__(self, manager: UIManager, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect,
+    def __init__(self, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect,
                  anchor: dict[str, str]):
-        super().__init__(relative_rect, manager, anchors=anchor)
+        super().__init__(relative_rect, pygame_gui.ui_manager.get_default_manager(), anchors=anchor)
         self.selected_setting: PointSetting = PointSetting()
 
         y = 10
         self.title: UITextBox = UITextBox("Point Setting", Rect(10, y, 310, 30), container=self)
         y += 30
 
-        self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Pos Variance X", manager, container=self)
+        self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Pos Variance X", container=self)
         y += 30
         self.pos_variance_x_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="-10")
         self.pos_variance_x_min.set_allowed_characters(NUM_CHARACTERS)
@@ -59,7 +60,7 @@ class PointSettingView(UIContainer):
         self.pos_variance_x_max.set_allowed_characters(NUM_CHARACTERS)
 
         y += 30
-        self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Pos Variance Y", manager, container=self)
+        self.title_pos_variance = UILabel(Rect(10, y, 310, 30), "Pos Variance Y", container=self)
         y += 30
         self.pos_variance_y_min = UITextEntryLine(Rect(10, y, 150, 30), container=self, initial_text="-10")
         self.pos_variance_y_min.set_allowed_characters(NUM_CHARACTERS)
