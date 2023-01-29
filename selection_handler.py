@@ -21,7 +21,7 @@ class Selectable:
 
     def unmark(self, mark: Marks):
         if self.is_marked(mark):
-            self.marking.remove(mark)
+            self.marking = [x for x in self.marking if x != mark]
 
     def is_marked(self, mark: Marks):
         return mark in self.marking
@@ -56,8 +56,9 @@ class SelectionHandler:
         :param selectables: to remove
         """
         for selectable in selectables:
-            self._selectables.remove(selectable)
-            self.selection.remove(selectable)
+            # Remark: remove only removes first occurrence
+            self._selectables = [x for x in self._selectables if x != selectable]
+            self.selection = [x for x in self.selection if x != selectable]
 
     def get_selected(self, selection: Rect) -> List[Selectable]:
         """
@@ -88,4 +89,5 @@ class SelectionHandler:
         for selectable in selectables:
             selectable.unmark(Marks.SELECTED)
         for selectable in selectables:
-            self.selection.remove(selectable)
+            # Remark: remove only removes first occurrence
+            self.selection = [x for x in self.selection if x != selectable]

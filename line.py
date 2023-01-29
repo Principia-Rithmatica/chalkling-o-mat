@@ -55,28 +55,9 @@ class Line(Selectable, DragAble):
             color = YELLOW
         return color
 
-    def draw_curves(self, screen: Surface, point: Point, connected_lines):
-        if len(connected_lines) < 2:
-            return []
-        color = self.get_color()
-        for start_line in connected_lines:
-            start_point = start_line.point_b if start_line.point_a == point else start_line.point_a
-            for end_line in connected_lines:
-                if start_line == end_line:
-                    continue
-                end_point = end_line.point_b if end_line.point_a == point else end_line.point_a
-                draw_bezier(screen, start_point, point, end_point, color)
-
     def regenerate(self):
         self.point_a.regenerate()
         self.point_b.regenerate()
-
-    def get_selected_point(self, pos: Tuple[float, float]) -> Point | None:
-        if self.point_a.is_selected(pos):
-            return self.point_a
-        if self.point_b.is_selected(pos):
-            return self.point_b
-        return None
 
     def get_pos(self) -> Tuple[float, float]:
         pa = self.point_a.get_pos()
@@ -88,6 +69,12 @@ class Line(Selectable, DragAble):
         self.point_a.set_pos(pos_a)
         pos_b = self.point_b.pos - direction
         self.point_b.set_pos(pos_b)
+
+        pos_a = self.point_a_bezier.pos - direction
+        self.point_a_bezier.set_pos(pos_a)
+        pos_b = self.point_b_bezier.pos - direction
+        self.point_b_bezier.set_pos(pos_b)
+        return [self.point_a, self.point_b, self.point_a_bezier, self.point_b_bezier]
 
     def is_selected(self, selection: Rect) -> bool:
         clipline = selection.clipline(self.point_a[0], self.point_a[1], self.point_b[0], self.point_b[1])

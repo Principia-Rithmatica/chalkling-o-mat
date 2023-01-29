@@ -68,34 +68,13 @@ class BaseFormView(DragAndDropHandler):
             return True
         return False
 
-    def click_bound_edit(self, event: Event):
-        self.area_selector.start_select(Vector2(event.pos))
-
-    def click_form_edit(self, event: Event):
-        # Start DnD
-        touched_elements = self.get_selected_from_pos(event.pos)
-        for element in touched_elements:
-            if element in self.form.selection:
-                drag_ables = [x for x in self.form.selection if isinstance(x, DragAble)]
-                self.start_drag(drag_ables)
-                break
-        # Select first point as previous one
-        for element in touched_elements:
-            if isinstance(element, Point):
-                self.form.set_previous_point(element)
-                break
-        # Start selection
-        print(f"Touched Elements: {len(touched_elements)}")
-        if len(touched_elements) == 0:
-            self.form.unselect(self.form.selection)
-            self.area_selector.start_select(Vector2(event.pos))
-
     def on_button_up(self, event: Event) -> bool:
         if event.button == RIGHT_MOUSE_BUTTON:
             return False
 
         if self.stop_drag():
             pygame.event.post(Event(EDIT_FORM))
+            return True
 
         # Selection was done
         selected_rect = self.area_selector.stop_select()
@@ -110,13 +89,36 @@ class BaseFormView(DragAndDropHandler):
                 print(f"{len(selection)} was selected")
                 self.form.select(selection)
                 return True
-
-        touched_elements = self.get_selected_from_pos(event.pos)
-        touched_points = [x for x in touched_elements if isinstance(x, Point)]
-        if len(touched_points) == 0:
-            # Just a random click
-            self.add_point(Vector2(event.pos))
         return False
+
+    def click_bound_edit(self, event: Event):
+        self.area_selector.start_select(Vector2(event.pos))
+
+    def click_form_edit(self, event: Event):
+        touched_elements = self.get_selected_from_pos(event.pos)
+
+        self.form.unselect(self.form.selection)
+
+        # Start selection
+        print(f"Touched Elements: {len(touched_elements)}")
+        if len(touched_elements) == 0:
+            self.area_selector.start_select(Vector2(event.pos))
+        else:
+            self.form.select(touched_elements)
+
+        # Start DnD
+        for element in touched_elements:
+            if element in self.form.selection:
+                drag_ables = [x for x in self.form.selection if isinstance(x, DragAble)]
+                self.start_drag(drag_ables)
+                break
+
+        # Select first point as previous one
+        for element in touched_elements:
+            if isinstance(element, Point):
+                print("Select previous point")
+                self.form.set_previous_point(element)
+                break
 
     def get_selected_from_pos(self, pos: Tuple[int, int]):
         return self.form.get_selected(
@@ -130,9 +132,6 @@ class BaseFormView(DragAndDropHandler):
             return False
 
         match event.key:
-            case pygame.K_j:
-                self.join_line()
-                return True
             case pygame.K_n:
                 self.form = BaseForm()
                 pygame.event.post(Event(EDIT_FORM))
@@ -145,6 +144,9 @@ class BaseFormView(DragAndDropHandler):
             case pygame.K_DELETE:
                 if self.form_surface.get_rect().collidepoint(pygame.mouse.get_pos()):
                     self.form.remove(self.form.selection)
+                return True
+            case pygame.K_a:
+                self.add_point(Vector2(pygame.mouse.get_pos()))
                 return True
         return False
 

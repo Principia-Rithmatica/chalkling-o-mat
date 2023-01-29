@@ -55,6 +55,7 @@ class Point(Selectable, DragAble):
 
     def move(self, direction: Vector2):
         self.set_pos(self.pos - direction)
+        return [self]
 
     def __getitem__(self, item):
         return self.pos[item]
