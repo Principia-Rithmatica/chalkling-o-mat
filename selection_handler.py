@@ -2,7 +2,11 @@ from abc import abstractmethod
 from enum import Enum
 from typing import List
 
+import pygame
 from pygame import Rect
+from pygame.event import Event
+
+from consts import SELECT_ELEMENT
 
 
 class Marks(Enum):
@@ -80,6 +84,7 @@ class SelectionHandler:
         for selectable in selectables:
             selectable.mark(Marks.SELECTED)
         self.selection.extend(selectables)
+        pygame.event.post(Event(SELECT_ELEMENT, selection=self.selection))
 
     def unselect(self, selectables: List[Selectable]):
         """

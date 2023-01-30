@@ -13,8 +13,7 @@ from consts import LEFT_MOUSE_BUTTON, RIGHT_MOUSE_BUTTON, EDIT_FORM, POINT_SIZE
 from dnd_handler import DragAndDropHandler, DragAble
 from event_dispatcher import EventDispatcher
 from line_setting import LineSetting
-from point import Point
-from point_setting import PointSetting
+from point import Point, PointSetting
 
 
 class Modes(Enum):

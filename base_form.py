@@ -8,8 +8,7 @@ from pygame.event import Event
 from consts import EDIT_FORM
 from line import Line
 from line_setting import LineSetting
-from point import Point
-from point_setting import PointSetting
+from point import Point, PointSetting
 from selection_handler import SelectionHandler, Selectable, Marks
 
 

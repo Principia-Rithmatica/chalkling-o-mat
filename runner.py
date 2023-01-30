@@ -1,17 +1,13 @@
 import pygame
 import pygame_gui
-from pygame.event import Event
 from pygame.rect import Rect
-from pygame_gui import UI_BUTTON_PRESSED
-from pygame_gui.core import UIContainer
-from pygame_gui.elements import UIButton
 
 from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
-from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, REGENERATE, TOP_LEFT
+from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_RIGHT, TOP_LEFT
 from event_dispatcher import EventDispatcher
 from line_setting import LineSettingView
-from point_setting import PointSettingView
+from point import PointSettingView
 from preview_view import PreviewView
 from stat_view import StatView
 
