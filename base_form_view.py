@@ -121,8 +121,7 @@ class BaseFormView(DragAndDropHandler):
                 break
 
     def get_selected_from_pos(self, pos: Tuple[int, int]):
-        return self.form.get_selected(
-            Rect(pos[0] - POINT_SIZE, pos[1] - POINT_SIZE, POINT_SIZE*2, POINT_SIZE*2))
+        return self.form.get_selected(Rect(pos[0]-2, pos[1]-2, 4, 4))
 
     def get_selected_points(self) -> List[Point]:
         return [x for x in self.form.selection if isinstance(x, Point)]

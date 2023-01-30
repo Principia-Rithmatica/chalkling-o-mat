@@ -5,6 +5,7 @@ from typing import Tuple, List
 
 import pygame
 from pygame import Surface, Rect
+from pygame.event import Event
 from pygame.math import Vector2
 
 from bezier import bezier_curve
@@ -33,8 +34,8 @@ class Line(Selectable, DragAble):
         self.point_a_bezier: Point = copy.deepcopy(point_a)
         self.point_b_bezier: Point = copy.deepcopy(point_b)
 
-        self.point_a_bezier.move(Vector2(0, 50))
-        self.point_b_bezier.move(Vector2(0, 50))
+        self.point_a_bezier.move(Vector2(0, 50), [])
+        self.point_b_bezier.move(Vector2(0, 50), [])
 
         self.width = 2
         self.settings: LineSetting = settings
@@ -64,17 +65,20 @@ class Line(Selectable, DragAble):
         pb = self.point_b.get_pos()
         return (pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2
 
-    def move(self, direction: Vector2):
-        pos_a = self.point_a.pos - direction
-        self.point_a.set_pos(pos_a)
-        pos_b = self.point_b.pos - direction
-        self.point_b.set_pos(pos_b)
+    def move(self, direction: Vector2, already_moved: List[any]):
+        if self.point_a not in already_moved:
+            self.point_a.move(direction, already_moved)
 
-        pos_a = self.point_a_bezier.pos - direction
-        self.point_a_bezier.set_pos(pos_a)
-        pos_b = self.point_b_bezier.pos - direction
-        self.point_b_bezier.set_pos(pos_b)
-        return [self.point_a, self.point_b, self.point_a_bezier, self.point_b_bezier]
+        if self.point_b not in already_moved:
+            self.point_b.move(direction, already_moved)
+
+        if self.point_a_bezier not in already_moved:
+            self.point_a_bezier.move(direction, already_moved)
+
+        if self.point_b_bezier not in already_moved:
+            self.point_b_bezier.move(direction, already_moved)
+
+        already_moved.append(self)
 
     def is_selected(self, selection: Rect) -> bool:
         clipline = selection.clipline(self.point_a[0], self.point_a[1], self.point_b[0], self.point_b[1])

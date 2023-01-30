@@ -10,9 +10,10 @@ from event_dispatcher import EventDispatcher
 
 class DragAble:
     @abstractmethod
-    def move(self, direction: Vector2) -> List[Type['DragAble']]:
+    def move(self, direction: Vector2, already_moved: List[any]):
         """
         Moves the drag able for the given amount in the direction.
+        :param already_moved: elements that got moved already to prevent to move parts of a whole twice
         :param direction: to move it
         :return: a list of drag ables that got moved in case of groups and lines that things don't get moved twice.
         """
@@ -60,8 +61,7 @@ class DragAndDropHandler:
         already_moved_objects = []
         for dragged_object in self._dragged_objects:
             if dragged_object not in already_moved_objects:
-                moved_objects = dragged_object.move(direction)
-                already_moved_objects.extend(moved_objects)
+                dragged_object.move(direction, already_moved_objects)
         self._previous_position = event.pos
         return True
 

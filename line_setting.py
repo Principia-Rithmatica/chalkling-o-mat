@@ -131,4 +131,6 @@ class LineSettingView(UIContainer):
             case pygame.K_7:
                 self.body_parts[BodyPart.HEAD].toggle()
                 return True
+            case pygame.K_c:
+                self.curve.toggle()
         return False

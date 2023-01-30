@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Tuple
+from typing import Tuple, List
 
 import pygame
 from pygame import Rect, Vector2
@@ -44,7 +44,8 @@ class Point(Selectable, DragAble):
         pygame.draw.rect(screen, GREY, rect, 2)
 
     def is_selected(self, selection: Rect) -> bool:
-        return selection.collidepoint(self.pos[0], self.pos[1])
+        collision_area = Rect(self.pos[0] - POINT_SIZE/2, self.pos[1] - POINT_SIZE/2, POINT_SIZE, POINT_SIZE)
+        return selection.colliderect(collision_area)
 
     def get_pos(self) -> Tuple[float, float]:
         return self.pos.xy[0], self.pos.xy[1]
@@ -53,9 +54,10 @@ class Point(Selectable, DragAble):
         self.pos.update(pos)
         self.settings.set_base(self.get_pos())
 
-    def move(self, direction: Vector2):
-        self.set_pos(self.pos - direction)
-        return [self]
+    def move(self, direction: Vector2, already_moved: List[any]):
+        if self not in already_moved:
+            self.set_pos(self.pos - direction)
+            already_moved.append(self)
 
     def __getitem__(self, item):
         return self.pos[item]
