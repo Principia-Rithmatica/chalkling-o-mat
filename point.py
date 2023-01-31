@@ -12,7 +12,7 @@ from pygame_gui.elements import UITextBox, UILabel, UITextEntryLine
 
 from consts import WHITE, YELLOW, POINT_SIZE, GREEN, GREY, NUM_CHARACTERS, SELECT_ELEMENT
 from dnd_handler import DragAble
-from event_dispatcher import EventDispatcher
+from event_dispatcher import EventDispatcher, on_change_float
 from selection_handler import Selectable, Marks
 
 
@@ -128,15 +128,18 @@ class PointSettingView(UIContainer):
         self.pos_variance_y_max = UITextEntryLine(Rect(160, y, 150, 30), container=self, initial_text="10")
         self.pos_variance_y_max.set_allowed_characters(NUM_CHARACTERS)
 
-        event_dispatcher.listen(self.on_change_data("pos_variance_x_min"), element=self.pos_variance_x_min,
-                                event_type=UI_TEXT_ENTRY_CHANGED)
-        event_dispatcher.listen(self.on_change_data("pos_variance_x_max"), element=self.pos_variance_x_max,
-                                event_type=UI_TEXT_ENTRY_CHANGED)
-        event_dispatcher.listen(self.on_change_data("pos_variance_y_min"), element=self.pos_variance_y_min,
-                                event_type=UI_TEXT_ENTRY_CHANGED)
-        event_dispatcher.listen(self.on_change_data("pos_variance_y_max"), element=self.pos_variance_y_max,
-                                event_type=UI_TEXT_ENTRY_CHANGED)
         event_dispatcher.listen(self.on_select, event_type=SELECT_ELEMENT)
+        event_dispatcher.listen(on_change_float("pos_variance_x_min", self.get_selected_settings),
+                                element=self.pos_variance_x_min, event_type=UI_TEXT_ENTRY_CHANGED)
+        event_dispatcher.listen(on_change_float("pos_variance_x_max", self.get_selected_settings),
+                                element=self.pos_variance_x_max, event_type=UI_TEXT_ENTRY_CHANGED)
+        event_dispatcher.listen(on_change_float("pos_variance_y_min", self.get_selected_settings),
+                                element=self.pos_variance_y_min, event_type=UI_TEXT_ENTRY_CHANGED)
+        event_dispatcher.listen(on_change_float("pos_variance_y_max", self.get_selected_settings),
+                                element=self.pos_variance_y_max, event_type=UI_TEXT_ENTRY_CHANGED)
+
+    def get_selected_settings(self):
+        return [point.settings for point in self.selection]
 
     def save_setting(self, setting: PointSetting):
         """
@@ -163,29 +166,12 @@ class PointSettingView(UIContainer):
         self.pos_variance_y_min.set_text(str(setting.pos_variance_y_min))
         self.pos_variance_y_max.set_text(str(setting.pos_variance_y_max))
 
-    def on_change_data(self, attribute: str) -> Callable[[Event], bool]:
-        def on_change(event: Event) -> bool:
-            print(f"update {attribute}")
-            for element in self.get_selected_points():
-                try:
-                    setattr(element.settings, attribute, float(event.text))
-                except ValueError:
-                    pass
-                except TypeError:
-                    pass
-            return True
-
-        return on_change
-
     def on_select(self, event: Event) -> bool:
-        self.selection = event.selection
+        self.selection = [x for x in event.selection if isinstance(x, Point)]
         self.update_view()
         return False
 
-    def get_selected_points(self):
-        return [x for x in self.selection if isinstance(x, Point)]
-
     def update_view(self):
-        for element in self.get_selected_points():
+        for element in self.selection:
             self.load_setting(element.settings)
             return

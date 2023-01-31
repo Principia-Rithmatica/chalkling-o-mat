@@ -6,7 +6,7 @@ from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
 from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_RIGHT, TOP_LEFT
 from event_dispatcher import EventDispatcher
-from line_setting import LineSettingView
+from line import LineSettingView
 from point import PointSettingView
 from preview_view import PreviewView
 from stat_view import StatView

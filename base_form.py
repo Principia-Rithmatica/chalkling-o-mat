@@ -6,8 +6,7 @@ from pygame import Surface, Vector2
 from pygame.event import Event
 
 from consts import EDIT_FORM
-from line import Line
-from line_setting import LineSetting
+from line import Line, LineSetting
 from point import Point, PointSetting
 from selection_handler import SelectionHandler, Selectable, Marks
 
@@ -37,7 +36,7 @@ class BaseForm(SelectionHandler):
 
     def render(self, screen: Surface):
         for line in self.lines:
-            line.draw(screen)
+            line.render(screen)
 
     def add_point(self, pos: Vector2, point_setting: PointSetting, line_setting: LineSetting) -> (Point, Line | None):
         point = Point(pos, point_setting)
@@ -54,7 +53,7 @@ class BaseForm(SelectionHandler):
     def add_line(self, point_a: Point, point_b: Point, line_setting: LineSetting) -> Line:
         line = Line(point_a, point_b, line_setting)
         self.lines.append(line)
-        self.add_selectables([line])
+        self.add_selectables([line, line.point_a_bezier, line.point_b_bezier])
         pygame.event.post(Event(EDIT_FORM))
         return line
 
@@ -64,6 +63,7 @@ class BaseForm(SelectionHandler):
                 self.points.remove(selectable)
             if isinstance(selectable, Line):
                 self.lines.remove(selectable)
+                self.remove_selectables([selectable.point_a_bezier, selectable.point_b_bezier])
         self.remove_selectables(selectables)
         pygame.event.post(Event(EDIT_FORM))
 
@@ -74,7 +74,8 @@ class BaseForm(SelectionHandler):
     def scale(self, factor: float):
         for point in self.points:
             point.scale(factor)
-
+        for line in self.lines:
+            line.scale(factor)
     def set_previous_point(self, point: Point | None):
         if self.previous_point is not None:
             self.previous_point.unmark(Marks.PREVIOUS)

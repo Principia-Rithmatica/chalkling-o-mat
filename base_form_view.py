@@ -12,7 +12,7 @@ from base_form import BaseForm
 from consts import LEFT_MOUSE_BUTTON, RIGHT_MOUSE_BUTTON, EDIT_FORM, POINT_SIZE
 from dnd_handler import DragAndDropHandler, DragAble
 from event_dispatcher import EventDispatcher
-from line_setting import LineSetting
+from line import LineSetting
 from point import Point, PointSetting
 
 
@@ -96,14 +96,17 @@ class BaseFormView(DragAndDropHandler):
     def click_form_edit(self, event: Event):
         touched_elements = self.get_selected_from_pos(event.pos)
 
-        self.form.unselect(self.form.selection)
+        touch_selected = any(element in self.form.selection for element in touched_elements)
 
-        # Start selection
-        print(f"Touched Elements: {len(touched_elements)}")
-        if len(touched_elements) == 0:
-            self.area_selector.start_select(Vector2(event.pos))
-        else:
-            self.form.select(touched_elements)
+        if not touch_selected:
+            self.form.unselect(self.form.selection)
+
+            # Start selection
+            print(f"Touched Elements: {len(touched_elements)}")
+            if len(touched_elements) == 0:
+                self.area_selector.start_select(Vector2(event.pos))
+            else:
+                self.form.select(touched_elements)
 
         # Start DnD
         for element in touched_elements:
@@ -146,6 +149,10 @@ class BaseFormView(DragAndDropHandler):
             case pygame.K_a:
                 self.add_point(Vector2(pygame.mouse.get_pos()))
                 return True
+            case pygame.K_j:
+                selected_points = self.get_selected_points()
+                if len(selected_points) == 1 and self.form.previous_point is not None:
+                    self.form.add_line(self.form.previous_point, selected_points[0], LineSetting())  # Todo use real LineSettings
         return False
 
     def join_line(self):
