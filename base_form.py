@@ -58,6 +58,7 @@ class BaseForm(SelectionHandler):
         return line
 
     def remove(self, selectables: List[Selectable]):
+        selectables = [selectable for selectable in selectables if not selectable.is_marked(Marks.BEZIER)]
         for selectable in selectables:
             if isinstance(selectable, Point):
                 self.points.remove(selectable)
@@ -76,7 +77,11 @@ class BaseForm(SelectionHandler):
             point.scale(factor)
         for line in self.lines:
             line.scale(factor)
+
     def set_previous_point(self, point: Point | None):
+        if point.is_marked(Marks.BEZIER):
+            return
+
         if self.previous_point is not None:
             self.previous_point.unmark(Marks.PREVIOUS)
         if self.previous_point == point:

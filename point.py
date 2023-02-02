@@ -24,6 +24,7 @@ class Point(Selectable, DragAble):
         self.settings: PointSetting = settings
         self.pos: Vector2 = pos
         self.settings.set_base(self.pos)
+        self.selectable = True
 
     def regenerate(self):
         self.pos.update(self.settings.get_new_position())
@@ -48,6 +49,9 @@ class Point(Selectable, DragAble):
         pygame.draw.rect(screen, GREY, rect, 2)
 
     def is_selected(self, selection: Rect) -> bool:
+        if not self.selectable:
+            return False
+
         collision_area = Rect(self.pos[0] - POINT_SIZE / 2, self.pos[1] - POINT_SIZE / 2, POINT_SIZE, POINT_SIZE)
         return selection.colliderect(collision_area)
 
@@ -175,3 +179,8 @@ class PointSettingView(UIContainer):
         for element in self.selection:
             self.load_setting(element.settings)
             return
+
+    def current(self):
+        setting = PointSetting()
+        self.save_setting(setting)
+        return setting

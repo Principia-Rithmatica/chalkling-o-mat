@@ -1,6 +1,5 @@
-import copy
 import math
-from typing import Tuple, List, Iterable, Callable
+from typing import Tuple, List, Iterable
 
 import pygame
 import pygame_gui
@@ -20,15 +19,6 @@ from point import Point, PointSetting
 from selection_handler import Selectable, Marks
 
 
-def draw_bezier(surface: Surface, start_point: Point, point_a: Point, point_b: Point, end_point: Point, color):
-    curve = bezier_curve([start_point.get_pos(), point_a.get_pos(), point_b.get_pos(), end_point.get_pos()])
-    prev_point = None
-    for curve_point in curve:
-        if prev_point is not None:
-            pygame.draw.line(surface, color, prev_point, curve_point)
-        prev_point = curve_point
-
-
 class Line(Selectable, DragAble):
 
     def __init__(self, point_a: Point, point_b: Point, settings: "LineSetting"):
@@ -37,27 +27,37 @@ class Line(Selectable, DragAble):
         self.point_b: Point = point_b
         self.point_a_bezier: Point = Point(Vector2(point_a.pos), PointSetting())
         self.point_b_bezier: Point = Point(Vector2(point_b.pos), PointSetting())
+        self.point_a_bezier.mark(Marks.BEZIER)
+        self.point_b_bezier.mark(Marks.BEZIER)
 
         self.point_a_bezier.move(Vector2(0, 50), [])
         self.point_b_bezier.move(Vector2(0, 50), [])
 
-        self.width = 2
+        self.width = 4
         self.settings: LineSetting = settings
 
     def draw(self, screen: Surface):
         color = self.get_color()
         if self.settings.curve:
-            draw_bezier(screen, self.point_a, self.point_a_bezier, self.point_b_bezier, self.point_b, color)
+            self.draw_bezier(screen, color)
         else:
             pygame.draw.line(screen, color, self.point_a.get_pos(), self.point_b.get_pos(), int(self.width))
-        if self.is_marked(Marks.SELECTED) and self.settings.curve:
+        if self.settings.curve and \
+                (self.is_marked(Marks.SELECTED)
+                 or self.point_a_bezier.is_marked(Marks.SELECTED)
+                 or self.point_b_bezier.is_marked(Marks.SELECTED)):
             self.point_a_bezier.draw(screen)
             self.point_b_bezier.draw(screen)
+            self.point_a_bezier.selectable = True
+            self.point_b_bezier.selectable = True
+        else:
+            self.point_a_bezier.selectable = False
+            self.point_b_bezier.selectable = False
 
     def render(self, screen: Surface):
         color = WHITE
         if self.settings.curve:
-            draw_bezier(screen, self.point_a, self.point_a_bezier, self.point_b_bezier, self.point_b, color)
+            self.draw_bezier(screen, color)
         else:
             pygame.draw.line(screen, color, self.point_a.get_pos(), self.point_b.get_pos(), int(self.width))
 
@@ -92,8 +92,33 @@ class Line(Selectable, DragAble):
         already_moved.append(self)
 
     def is_selected(self, selection: Rect) -> bool:
-        clipline = selection.clipline(self.point_a[0], self.point_a[1], self.point_b[0], self.point_b[1])
-        return clipline != ()
+        if not self.settings.curve:
+            clipline = selection.clipline(self.point_a[0], self.point_a[1], self.point_b[0], self.point_b[1])
+            return clipline != ()
+        else:
+            curve = self.get_bezier()
+            prev_point = None
+            for curve_point in curve:
+                if prev_point is not None:
+                    clipline = selection.clipline(prev_point, curve_point)
+                    if clipline != ():
+                        return True
+                prev_point = curve_point
+            return False
+
+    def draw_bezier(self, surface: Surface, color: any):
+        curve = self.get_bezier()
+        prev_point = None
+        for curve_point in curve:
+            if prev_point is not None:
+                pygame.draw.line(surface, color, prev_point, curve_point, self.width)
+            prev_point = curve_point
+
+    def get_bezier(self) -> List[Tuple[float, float]]:
+        return bezier_curve([self.point_a.get_pos(),
+                             self.point_a_bezier.get_pos(),
+                             self.point_b_bezier.get_pos(),
+                             self.point_b.get_pos()])
 
     def distance(self, p: Point | Tuple[float, float]) -> float:
         if self.point_a is None or self.point_b is None:
@@ -125,7 +150,6 @@ class Line(Selectable, DragAble):
     def scale(self, factor: float):
         self.point_a_bezier.scale(factor)
         self.point_b_bezier.scale(factor)
-
 
 
 class LineSetting:
@@ -248,3 +272,8 @@ class LineSettingView(UIContainer):
             case pygame.K_c:
                 self.curve.toggle()
         return False
+
+    def current(self):
+        setting = LineSetting()
+        self.save_setting(setting)
+        return setting

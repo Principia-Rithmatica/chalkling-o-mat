@@ -13,6 +13,7 @@ class Marks(Enum):
     UNMARKED = 0
     SELECTED = 1
     PREVIOUS = 2
+    BEZIER = 3
 
 
 class Selectable:

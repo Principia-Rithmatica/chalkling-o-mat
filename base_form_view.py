@@ -12,8 +12,8 @@ from base_form import BaseForm
 from consts import LEFT_MOUSE_BUTTON, RIGHT_MOUSE_BUTTON, EDIT_FORM, POINT_SIZE
 from dnd_handler import DragAndDropHandler, DragAble
 from event_dispatcher import EventDispatcher
-from line import LineSetting
-from point import Point, PointSetting
+from line import LineSetting, LineSettingView
+from point import Point, PointSetting, PointSettingView
 
 
 class Modes(Enum):
@@ -23,13 +23,16 @@ class Modes(Enum):
 
 
 class BaseFormView(DragAndDropHandler):
-    def __init__(self, event_dispatcher: EventDispatcher):
+    def __init__(self, event_dispatcher: EventDispatcher, point_setting_view: PointSettingView,
+                 line_setting_view: LineSettingView):
         super().__init__(event_dispatcher)
         self.form_surface = pygame.Surface((512, 512))
         self.form: BaseForm = BaseForm()
         self.mode: Modes = Modes.FROM_EDIT
         self.editable: bool = True
         self.area_selector: AreaSelector = AreaSelector(event_dispatcher, self.form_surface)
+        self.point_setting_view = point_setting_view
+        self.line_setting_view = line_setting_view
 
         event_dispatcher.listen(self.on_button_down, event_type=pygame.MOUSEBUTTONDOWN)
         event_dispatcher.listen(self.on_button_up, event_type=pygame.MOUSEBUTTONUP)
@@ -150,25 +153,16 @@ class BaseFormView(DragAndDropHandler):
                 self.add_point(Vector2(pygame.mouse.get_pos()))
                 return True
             case pygame.K_j:
-                selected_points = self.get_selected_points()
-                if len(selected_points) == 1 and self.form.previous_point is not None:
-                    self.form.add_line(self.form.previous_point, selected_points[0], LineSetting())  # Todo use real LineSettings
+                self.join_line()
         return False
 
     def join_line(self):
-        pos = pygame.mouse.get_pos()
-        selection = self.get_selected_from_pos(pos)
-        points = [x for x in selection if isinstance(x, Point)]
-        previous_point = self.form.previous_point
-
-        # TODO Also join 2 selected points
-        if len(points) == 0 or previous_point is None:
-            return
-
-        self.form.add_line(points[0], previous_point, LineSetting())  # TODO Swap line setting with real one
+        points = self.get_selected_points()
+        if len(points) == 2:
+            self.form.add_line(points[0], points[1], self.line_setting_view.current())
 
     def add_point(self, pos: Vector2):
-        self.form.add_point(pos, PointSetting(), LineSetting())  # TODO Swap line setting with real one
+        self.form.add_point(pos, self.point_setting_view.current(), self.line_setting_view.current())
         print("Add point")
 
     def set_current_form(self, form: BaseForm):

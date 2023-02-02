@@ -27,7 +27,7 @@ class Runner:
         self.event_dispatcher = EventDispatcher()
         self.point_setting_view = PointSettingView(self.event_dispatcher, Rect(-350, 10, 350, 340), TOP_RIGHT)
         self.line_setting_view = LineSettingView(self.event_dispatcher, Rect(-350, 240, 350, 340), TOP_RIGHT)
-        self.base_form_view = BaseFormView(self.event_dispatcher)
+        self.base_form_view = BaseFormView(self.event_dispatcher, self.point_setting_view, self.line_setting_view)
         self.stats_view = StatView(self.event_dispatcher, Rect(10, 522, 200, 200), TOP_LEFT, self.base_form_view)
         self.storage_view = BaseFormStorageView(self.event_dispatcher, self.base_form_view,
                                                 Rect(-170, -120, 170, 120), BOTTOM_RIGHT)
