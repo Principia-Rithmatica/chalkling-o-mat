@@ -90,9 +90,3 @@ class BaseForm(SelectionHandler):
             self.previous_point = point
             if point is not None:
                 point.mark(Marks.PREVIOUS)
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        # Handle old not migrated data
-        if 'state' not in state:
-            self.stats = Stats()

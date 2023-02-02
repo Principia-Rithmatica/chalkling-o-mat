@@ -6,6 +6,7 @@ from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
 from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_RIGHT, TOP_LEFT
 from event_dispatcher import EventDispatcher
+from exporter_view import ExporterView
 from line import LineSettingView
 from point import PointSettingView
 from preview_view import PreviewView
@@ -31,6 +32,8 @@ class Runner:
         self.stats_view = StatView(self.event_dispatcher, Rect(10, 522, 200, 200), TOP_LEFT, self.base_form_view)
         self.storage_view = BaseFormStorageView(self.event_dispatcher, self.base_form_view,
                                                 Rect(-170, -120, 170, 120), BOTTOM_RIGHT)
+        self.exporter_view = ExporterView(self.event_dispatcher, Rect(-340, -120, 180, 120), BOTTOM_RIGHT,
+                                          self.base_form_view, self.storage_view)
         self.drawables = [self.base_form_view]
 
         preview_width = 128
@@ -39,7 +42,7 @@ class Runner:
             x = i % 2 * preview_width
             y = int(i / 2) * preview_height
             view_rect = Rect(220 + x, 522 + y, preview_width, preview_height)
-            preview_view = PreviewView(view_rect, self.event_dispatcher, self.base_form_view, preview_width / 512)
+            preview_view = PreviewView(view_rect, self.event_dispatcher, self.base_form_view)
             self.drawables.append(preview_view)
 
     def run(self):

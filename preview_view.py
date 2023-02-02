@@ -1,4 +1,5 @@
 import copy
+from types import NoneType
 from typing import List, Tuple
 
 import pygame
@@ -13,13 +14,14 @@ from event_dispatcher import EventDispatcher
 
 
 class PreviewView:
-    def __init__(self, rect: Rect, event_dispatcher: EventDispatcher, base_form_view: BaseFormView, scale_factor: float):
+    def __init__(self, rect: Rect, event_dispatcher: EventDispatcher, base_form_view: BaseFormView):
         self.surface: Surface = Surface(rect.size)
         self.event_dispatcher = event_dispatcher
         self.base_form_view = base_form_view
         self.current_form: BaseForm | None = None
         self.rect = rect
-        self.scale_factor = scale_factor
+        self.scale_factor = rect.width / base_form_view.form_surface.get_rect().width
+        self.background = (5, 5, 5)
 
         event_dispatcher.listen(self.regenerate, event_type=REGENERATE)
         event_dispatcher.listen(self.regenerate, event_type=UI_TEXT_ENTRY_CHANGED)
@@ -34,7 +36,7 @@ class PreviewView:
         return False
 
     def draw(self, screen: Surface):
-        self.surface.fill((5, 5, 5))
+        self.surface.fill(self.background)
         if self.current_form is not None:
             self.current_form.render(self.surface)
         screen.blit(self.surface, self.rect.topleft)

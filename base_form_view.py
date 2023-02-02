@@ -85,6 +85,7 @@ class BaseFormView(DragAndDropHandler):
                 points = self.get_selected_points()
                 points[0].set_bounds(selected_rect)
                 pygame.event.post(Event(EDIT_FORM))
+                self.mode = Modes.FROM_EDIT
                 return True
             elif self.mode == Modes.FROM_EDIT:
                 selection = self.form.get_selected(selected_rect)
@@ -109,7 +110,12 @@ class BaseFormView(DragAndDropHandler):
             if len(touched_elements) == 0:
                 self.area_selector.start_select(Vector2(event.pos))
             else:
-                self.form.select(touched_elements)
+                points = [e for e in touched_elements if isinstance(e, Point)]
+                # for better hitting points when at least one point was under the mouse just select them
+                if len(points) > 0:
+                    self.form.select(points)
+                else:
+                    self.form.select(touched_elements)
 
         # Start DnD
         for element in touched_elements:

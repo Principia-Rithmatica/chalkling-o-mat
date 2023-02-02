@@ -81,6 +81,9 @@ def on_change_checked_list(attribute: str, get_elements: Callable[[], Iterable])
     """
     def converter(element, event: Event):
         values: List = getattr(element, attribute)
-        values.append(event.ui_element.data)
+        if event.checked:
+            values.append(event.ui_element.data)
+        else:
+            values.remove(event.ui_element.data)
         setattr(element, attribute, values)
     return on_change(converter, get_elements)
