@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Iterable, List
 
 from pygame.event import Event
 from pygame_gui.core import UIElement
@@ -26,3 +26,61 @@ class EventDispatcher:
         for listener in self._listeners:
             if listener(event):
                 return
+
+
+def on_change(converter: Callable[[any, Event], None], get_elements: Callable[[], Iterable])\
+        -> Callable[[Event], bool]:
+    """
+    Creates a general event handler that needs a converter to update the value of all elements in get_selections.
+    :param converter: to set change data in the selected
+    :param get_elements: getter to receive the current elements that should be changed
+    :return: event handler
+    """
+    def handle(event: Event) -> bool:
+        for element in get_elements():
+            try:
+                converter(element, event)
+            except ValueError:
+                pass
+            except TypeError:
+                pass
+        return True
+    return handle
+
+
+def on_change_float(attribute: str, get_elements: Callable[[], Iterable]) -> Callable[[Event], bool]:
+    """
+    Generates an event handler that updates the attribute of all elements in get_selections.
+    :param attribute: to update (has to be a float)
+    :param get_elements: all elements that should be updated
+    :return: event handler
+    """
+    def converter(element, event: Event):
+        setattr(element, attribute, float(event.text))
+    return on_change(converter, get_elements)
+
+
+def on_change_checked(attribute: str, get_elements: Callable[[], Iterable]) -> Callable[[Event], bool]:
+    """
+    Generates an event handler that update the attribute of all elements in get_selections.
+    :param attribute: to update (has to be a bool)
+    :param get_elements: all elements that should be updated
+    :return: event handler
+    """
+    def converter(element, event: Event):
+        setattr(element, attribute, event.checked)
+    return on_change(converter, get_elements)
+
+
+def on_change_checked_list(attribute: str, get_elements: Callable[[], Iterable]) -> Callable[[Event], bool]:
+    """
+    Generates an event handler that update the attribute of all elements in get_selections.
+    :param attribute: to update (has to be a List)
+    :param get_elements: all elements that should be updated
+    :return: event handler
+    """
+    def converter(element, event: Event):
+        values: List = getattr(element, attribute)
+        values.append(event.ui_element.data)
+        setattr(element, attribute, values)
+    return on_change(converter, get_elements)

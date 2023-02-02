@@ -1,17 +1,13 @@
 import pygame
 import pygame_gui
-from pygame.event import Event
 from pygame.rect import Rect
-from pygame_gui import UI_BUTTON_PRESSED
-from pygame_gui.core import UIContainer
-from pygame_gui.elements import UIButton
 
 from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
-from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, REGENERATE, TOP_LEFT
+from consts import WINDOW_WIDTH, WINDOW_HEIGHT, TOP_RIGHT, BOTTOM_RIGHT, TOP_LEFT
 from event_dispatcher import EventDispatcher
-from line_setting import LineSettingView
-from point_setting import PointSettingView
+from line import LineSettingView
+from point import PointSettingView
 from preview_view import PreviewView
 from stat_view import StatView
 
@@ -29,15 +25,11 @@ class Runner:
         self.background.fill((0, 0, 0))
 
         self.event_dispatcher = EventDispatcher()
-        self.point_setting_view = PointSettingView(
-            self.ui_manager, self.event_dispatcher, Rect(-350, 10, 350, 340), TOP_RIGHT)
-        self.line_setting_view = LineSettingView(
-            self.ui_manager, self.event_dispatcher, Rect(-350, 240, 350, 340), TOP_RIGHT)
-        self.base_form_view = BaseFormView(self.ui_manager, self.event_dispatcher, self.point_setting_view,
-                                           self.line_setting_view)
-        self.stats_view = StatView(self.ui_manager, self.event_dispatcher, Rect(10, 522, 200, 200), TOP_LEFT,
-                                   self.base_form_view)
-        self.storage_view = BaseFormStorageView(self.ui_manager, self.event_dispatcher, self.base_form_view,
+        self.point_setting_view = PointSettingView(self.event_dispatcher, Rect(-350, 10, 350, 340), TOP_RIGHT)
+        self.line_setting_view = LineSettingView(self.event_dispatcher, Rect(-350, 240, 350, 340), TOP_RIGHT)
+        self.base_form_view = BaseFormView(self.event_dispatcher, self.point_setting_view, self.line_setting_view)
+        self.stats_view = StatView(self.event_dispatcher, Rect(10, 522, 200, 200), TOP_LEFT, self.base_form_view)
+        self.storage_view = BaseFormStorageView(self.event_dispatcher, self.base_form_view,
                                                 Rect(-170, -120, 170, 120), BOTTOM_RIGHT)
         self.drawables = [self.base_form_view]
 
