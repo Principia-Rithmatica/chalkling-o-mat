@@ -103,7 +103,9 @@ class BaseFormView(DragAndDropHandler):
         touch_selected = any(element in self.form.selection for element in touched_elements)
 
         if not touch_selected:
-            self.form.unselect(self.form.selection)
+            # When no shift was pressed
+            if pygame.key.get_mods() & pygame.KMOD_SHIFT == 0:
+                self.form.unselect(self.form.selection)
 
             # Start selection
             print(f"Touched Elements: {len(touched_elements)}")
