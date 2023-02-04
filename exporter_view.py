@@ -1,7 +1,11 @@
+import copy
 import os
 
+import numpy as np
+import pyexiv2
 import pygame
 import pygame_gui
+from pyexiv2 import Image
 from pygame import Surface
 from pygame.event import Event
 from pygame.rect import Rect
@@ -9,6 +13,7 @@ from pygame_gui import UI_BUTTON_PRESSED
 from pygame_gui.core import UIContainer
 from pygame_gui.elements import UIButton, UITextEntryLine
 
+from base_form import BaseForm, Stats
 from base_form_storage import BaseFormStorageView
 from base_form_view import BaseFormView
 from consts import REGENERATE
@@ -30,6 +35,14 @@ def get_latest_file(folder):
     return highest_number
 
 
+def save_meta(file_path: str, stats: Stats):
+    xmp_stats = {'Xmp.dc.' + key: value for key, value in vars(stats).items()}
+
+    image = Image(file_path)
+    image.modify_xmp(xmp_stats)
+    image.close()
+
+
 class ExporterView(UIContainer):
     def __init__(self, event_dispatcher: EventDispatcher, relative_rect: pygame.Rect, anchor: dict[str, str],
                  base_form_view: BaseFormView, storage_view: BaseFormStorageView):
@@ -42,6 +55,7 @@ class ExporterView(UIContainer):
         self.export_surface = Surface(export_size.size)
         self.render: PreviewView = PreviewView(export_size, event_dispatcher, base_form_view)
         self.storage_view = storage_view
+        self.base_form_view = base_form_view
 
         event_dispatcher.listen(self.on_export, element=self.export_button, event_type=UI_BUTTON_PRESSED)
 
@@ -59,7 +73,10 @@ class ExporterView(UIContainer):
             for copy_index in range(copies):
                 self.render.regenerate(Event(REGENERATE))
                 self.render.draw(self.export_surface)
-                pygame.image.save(self.export_surface, os.path.join("data", folder, f"{starts_with + copy_index}.png"))
+                stats = self.calculate_similarity(self.base_form_view.form, self.render.current_form)
+                file_path = os.path.join("data", folder, f"{starts_with + copy_index}.png")
+                pygame.image.save(self.export_surface, file_path)
+                save_meta(file_path, stats)
             print(f"{copies} copies exported")
         except TypeError:
             pass
@@ -68,3 +85,15 @@ class ExporterView(UIContainer):
         print("..export done")
         return True
 
+    def calculate_similarity(self, original: BaseForm, variant: BaseForm) -> Stats:
+        original_points = original.to_numpy()
+        variant_points = variant.to_numpy()
+        deviation = np.mean(1 - cosine_similarity(original_points, variant_points))
+        stats = copy.deepcopy(original.stats)
+        stats.scale(deviation)
+        stats.aesthetic = deviation
+        return stats
+
+
+def cosine_similarity(a, b) -> float:
+    return np.dot(a, b.T)/(np.linalg.norm(a)*np.linalg.norm(b))

@@ -1,6 +1,7 @@
 import math
 from typing import List, Tuple
 
+import numpy as np
 import pygame
 from pygame import Surface, Vector2
 from pygame.event import Event
@@ -18,6 +19,13 @@ class Stats:
         self.speed: float = 0.5
         self.life: float = 0.5
         self.aesthetic: float = 0.5
+
+    def scale(self, factor):
+        self.attack *= factor
+        self.defense *= factor
+        self.speed *= factor
+        self.life *= factor
+        self.aesthetic *= factor
 
 
 class BaseForm(SelectionHandler):
@@ -90,3 +98,6 @@ class BaseForm(SelectionHandler):
             self.previous_point = point
             if point is not None:
                 point.mark(Marks.PREVIOUS)
+
+    def to_numpy(self):
+        return np.array([p.get_pos() for p in self.points])
