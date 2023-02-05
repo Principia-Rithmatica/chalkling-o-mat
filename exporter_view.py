@@ -2,10 +2,10 @@ import copy
 import os
 
 import numpy as np
-import pyexiv2
 import pygame
 import pygame_gui
-from pyexiv2 import Image
+from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 from pygame import Surface
 from pygame.event import Event
 from pygame.rect import Rect
@@ -36,11 +36,11 @@ def get_latest_file(folder):
 
 
 def save_meta(file_path: str, stats: Stats):
-    xmp_stats = {'Xmp.dc.' + key: value for key, value in vars(stats).items()}
-
-    image = Image(file_path)
-    image.modify_xmp(xmp_stats)
-    image.close()
+    img = Image.open(file_path)
+    info = PngInfo()
+    for key, value in vars(stats).items():
+        info.add_text(key, str(value))
+    img.save(file_path, "PNG", pnginfo=info)
 
 
 class ExporterView(UIContainer):
@@ -78,10 +78,10 @@ class ExporterView(UIContainer):
                 pygame.image.save(self.export_surface, file_path)
                 save_meta(file_path, stats)
             print(f"{copies} copies exported")
-        except TypeError:
-            pass
-        except ValueError:
-            pass
+        except TypeError as e:
+            print(e)
+        except ValueError as e:
+            print(e)
         print("..export done")
         return True
 
@@ -96,4 +96,4 @@ class ExporterView(UIContainer):
 
 
 def cosine_similarity(a, b) -> float:
-    return np.dot(a, b.T)/(np.linalg.norm(a)*np.linalg.norm(b))
+    return np.dot(a, b.T) / (np.linalg.norm(a) * np.linalg.norm(b))
